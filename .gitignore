@@ -1,0 +1,5 @@
+/.venv
+/__pycache__
+/config.py
+/data/bot.db
+/upload_my_files.py
