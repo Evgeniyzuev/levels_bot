@@ -74,6 +74,8 @@ async def good_morning(user_id):
     await bot.send_message(user_id, text)
 
 
+
+
 async def up_me(user_id):
     # with database.Session() as session:
         user = await database.get_user(user_id)
@@ -109,7 +111,7 @@ async def up_me(user_id):
             await if_grow_wallet_is_negative(user_id)
                     
             balance = current_leader.restate + current_leader.grow_wallet + current_leader.liquid_wallet
-            text0 = "\n💳 Баланс: " + ( '%.2f' %(balance)) + " рублей" 
+            text0 = await get_balance(current_leader_id)
 
             await bot.send_message(user_id, f'Уровень повышен 🔼: {user.level+1}\n')
             await bot.send_message(current_leader_id, f'Входящий: +{lead_grace} рублей'+ text0 +f'\n\nВаш реферал {user.user_name}: {(user.level)} 🔼 {user.level+1}\
@@ -340,22 +342,15 @@ async def get_balance(user_id):
     #      await bot.send_message(user_id, "Пользователь не найден. Перезагрузите бота")
     # else:     
         user = await database.get_user(user_id)
-
-
-        text1 = "\n\n🏡 Restate(25%):  " + '%.2f' %(user.restate) + ' рублей'
-        text2 =   "\n🌱 Grow(20%):      " + '%.2f' %(user.grow_wallet) + ' рублей'
-        text3 =   "\n💧 Liquid(0%):       " + '%.2f' %(user.liquid_wallet) + ' рублей'
-
         sum = user.restate + user.grow_wallet + user.liquid_wallet
-        text0 = "💳 Баланс:            " + ( '%.2f' %(sum)) + " рублей"
-        balance_text = text0 + text1 + text2 + text3 + texts.accounts_about_text
+        balance_text = "\n💳 Баланс:            " + ( '%.2f' %(sum)) + " рублей"
         return balance_text
         
       
 # TABS вкладки
 #  Вкладки МЕНЮ
 async def main_menu(user_id):
-     await bot.send_message(user_id, "🟢 Кнопки внизу 🔢 ⬇️", reply_markup=kb.menu_buttons_reply_markup)
+     await bot.send_message(user_id,  reply_markup=kb.menu_buttons_reply_markup) #"🟢 Кнопки внизу 🔢 ⬇️",
 
     #  await bot.send_message(user_id, " Все  вкладки  главного  меню  ", reply_markup=kb.menu_markup)
 
@@ -379,7 +374,17 @@ async def settings_tub(user_id):
      await bot.send_message(user_id, f"\nНастройки",)
 
 async def balance_tub(user_id):
-    balance_text = await get_balance(user_id)
+    user = await database.get_user(user_id)
+
+
+    text1 = "\n\n🏡 Restate(25%):  " + '%.2f' %(user.restate) + ' рублей'
+    text2 =   "\n🌱 Grow(20%):      " + '%.2f' %(user.grow_wallet) + ' рублей'
+    text3 =   "\n💧 Liquid(0%):       " + '%.2f' %(user.liquid_wallet) + ' рублей'
+
+    sum = user.restate + user.grow_wallet + user.liquid_wallet
+    text0 = "💳 Баланс:            " + ( '%.2f' %(sum)) + " рублей"
+    balance_text = text0 + text1 + text2 + text3 + texts.accounts_about_text
+
 
     try:
         await bot.send_photo(user_id, photo=config.photo_ids_test['restate_grow_liquid'], caption=f'{balance_text}', reply_markup=kb.balance_control_markup)
