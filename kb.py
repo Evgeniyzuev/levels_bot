@@ -4,9 +4,9 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardBu
 #     InlineKeyboardButton(text="💳\nБаланс", callback_data="balance")],[InlineKeyboardButton(text="💎\nПартнёры", callback_data="partners"), InlineKeyboardButton(text="🎁\nБонусы", callback_data="bonuses")],
 #     [InlineKeyboardButton(text="🔎\nИнфо", callback_data="info")]]
 
-menu_button = [InlineKeyboardButton(text="🟢 Menu", callback_data="menu", one_time_keyboard = True)]
+# menu_button = [InlineKeyboardButton(text="🟢 Menu", callback_data="menu", one_time_keyboard = True)]
 
-profile_button = [InlineKeyboardButton(text="🪪 Профиль", callback_data="profile", one_time_keyboard = True)]
+profile_button = [InlineKeyboardButton(text="😃 Профиль", callback_data="profile", one_time_keyboard = True)]
 bonus_button = [InlineKeyboardButton(text="🎁 Открыть Бонус", callback_data="open_bonus", one_time_keyboard = True)]
 up_level = [InlineKeyboardButton(text="🔼 Поднять уровень", callback_data="up_level", one_time_keyboard = True)]
 up_me = [InlineKeyboardButton(text="🔼 Поднять сейчас", callback_data="up_me", one_time_keyboard = True)]
@@ -36,12 +36,12 @@ changed_amount_payment_confirm = InlineKeyboardButton(text="Подтвердит
 
 
 
-profile_buttons = [menu_button]
-resources_buttons = [menu_button]
+profile_buttons = []
+resources_buttons = []
 level_buttons = [up_level]
-balance_buttons = [menu_button]
-partners_buttons = [menu_button] 
-info_buttons = [menu_button]
+balance_buttons = []
+partners_buttons = [] 
+info_buttons = []
 bonus_buttons = [bonus_button, profile_button,]
 
 balance_control_buttons = [[restate_up, grow_wallet_up, liquid_to_grow], [restate_down, grow_to_liquid, liquid_wallet_down]]
@@ -50,7 +50,7 @@ balance_control_buttons = [[restate_up, grow_wallet_up, liquid_to_grow], [restat
 
 
 # menu_markup = InlineKeyboardMarkup(inline_keyboard=menu_buttons, one_time_keyboard = True, resize_keyboard=True)
-menu_button_markup = InlineKeyboardMarkup(inline_keyboard=[menu_button], one_time_keyboard = True)
+# menu_button_markup = InlineKeyboardMarkup(inline_keyboard=[menu_button], one_time_keyboard = True)
 profile_markup = InlineKeyboardMarkup(inline_keyboard=profile_buttons, one_time_keyboard = True)
 resources_markup = InlineKeyboardMarkup(inline_keyboard=resources_buttons, one_time_keyboard = True)
 level_markup = InlineKeyboardMarkup(inline_keyboard=level_buttons, one_time_keyboard = True)
@@ -85,17 +85,16 @@ add_balance_ready = InlineKeyboardMarkup(inline_keyboard=[add_balance_ready])
 "1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣0️⃣"
 
 
-button1 = KeyboardButton(text="🟢\nМеню")
+# button101 = KeyboardButton(text="🟢\nМеню")
 
-button2 = KeyboardButton(text="🪪\nПрофиль")
-button3 = KeyboardButton(text="🔼\nУровень")
-button4 = KeyboardButton(text="💳\nБаланс")
+button1 = KeyboardButton(text="😃\nПрофиль")
+button2 = KeyboardButton(text="🔼\nУровень")
+button3 = KeyboardButton(text="💳\nБаланс")
+button4 = KeyboardButton(text="⚙️\nНастрой")
 button5 = KeyboardButton(text="💎\nПартнеры")
 button6 = KeyboardButton(text="🔗\nРесурсы")
 button7 = KeyboardButton(text="🎁\nБонусы")
 button8 = KeyboardButton(text="🔎\nИнфо")
-
-switch_tabs_emoji_text=["🟢\nМеню", "🪪\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "🔎\nИнфо"]
 
 
 menu_buttons_reply_markup = ReplyKeyboardMarkup(keyboard=[[button1, button2, button3, button4], [button5, button6, button7, button8]], resize_keyboard=True)

@@ -479,27 +479,30 @@ async def check_done(callback_query: types.CallbackQuery):
 
 # SWITCH TABS
 
-switch_tabs_data =      ["menu"   , "profile"   , "resources"   , "level"      , "balance"    , "partners"    , "bonuses"   , "info"     ] 
-
-switch_tabs_text=      ["Меню"   , "Профиль"   , "Ресурсы"     , "Уровень"    , "Баланс"     , "Партнеры"    , "Бонусы"    , "Инфо"     ]
-switch_tabs_emoji_text=["📍\nМеню", "🪪\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "🔎\nИнфо"]
-switch_tabs_commands = ["/menu"  , "/profile"  , "/resources"    , "/level"     , "/balance"   , "/partners"   , "/bonuses"    , "/info"    ]
+switch_tabs_data =      ["profile"   , "resources"   , "level", "settings" , "balance"  , "partners"  , "bonuses"   , "info"     ] 
+switch_tabs_text=      ["Профиль"   , "Ресурсы"     , "Уровень"  , "Настройки"  , "Баланс"     , "Партнеры"    , "Бонусы"    , "Инфо"     ]
+switch_tabs_emoji_text=["😃\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "⚙️\nНастройки", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "🔎\nИнфо"]
+switch_tabs_commands = ["/profile"  , "/resources"    , "/level"     , "/settings"   , "/balance"   , "/partners"   , "/bonuses"    , "/info"    ]
 
 @dp.callback_query(F.data)
 async def swith_menu_tubs(callback_query: types.CallbackQuery):
     data = callback_query.data
-
     if data in switch_tabs_data:
-
         await utils.switch_tubs(data, user_id=callback_query.from_user.id)
-        # await bot.answer_callback_query(callback_query.from_user.id)
+
+@dp.message(F.text == '/menu') 
+async def main_menu(msg: Message):
+    await utils.main_menu(user_id=msg.from_user.id)
+
+@dp.message(F.data == "menu")
+async def main_menu(callback_query: types.CallbackQuery):
+    await utils.main_menu(user_id=callback_query.from_user.id)
 
        
 @dp.message(F.text)  
 async def swith_menu_tubs(msg: Message):
     if msg.text in switch_tabs_emoji_text:
         index = switch_tabs_emoji_text.index(msg.text)
-
         data = switch_tabs_data[index]
         await utils.switch_tubs(data, user_id=msg.from_user.id)
     elif msg.text in switch_tabs_text:

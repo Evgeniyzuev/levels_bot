@@ -14,9 +14,6 @@ from database import User
 from aiogram.types import ChatJoinRequest
 
 
-
-
-
 # BONUS
 async def add_bonus(user_id):
     try:
@@ -80,10 +77,6 @@ async def good_morning(user_id):
 async def up_me(user_id):
     # with database.Session() as session:
         user = await database.get_user(user_id)
-
-
-
-
         current_leader_id = user.current_leader_id
         current_leader = await database.get_user(current_leader_id)
         restate_require = database.ubicoin * (2 ** (user.level+1))
@@ -232,11 +225,6 @@ async def approve_chat_join_request(chat_join: ChatJoinRequest):
         else: await bot.send_message(chat_join.from_user.id, f'Недостаточный уровнень для доступа в канал {chat_id}')
 
 
-
-
-
-
-
 async def get_bonuses_available(user_id):
     user = await database.get_user(user_id)
     # bonuses_available = user.bonuses_available
@@ -251,9 +239,6 @@ async def open_bonus(user_id):
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
 
-        text4 = "\nЗдесь пока ничего нет. Куда всё делось? 🤔 \n\nБонусы разыгрываются каждый день! \nМы отправим уведомление, когда придет бонус.\
-                \n\nРекомендуем включить всплывающие уведомления в настройках бота🔔 Чтобы не пропустить.\n\n Нажимайте поделиться\n получайте бонус за каждого нового подписчика! 🎁"
-          
         if user.bonuses_available >= 1:
             user.bonuses_available-= 1
             bonus_size = float(random.randint(0, 333))
@@ -277,9 +262,9 @@ async def open_bonus(user_id):
                 await bot.send_message(user_id,'Здесь могло быть наше фото 😄\n' + text1 + text2 + text3)
         else:
             try:
-                await bot.send_photo(user_id, photo=config.photo_ids_test['travolta'], caption=text4) 
+                await bot.send_photo(user_id, photo=config.photo_ids_test['travolta'], caption=texts.bonuses_none)
             except:
-                await bot.send_message(user_id,'Здесь могло быть наше фото 😄\n' + text4)
+                await bot.send_message(user_id,'Здесь могло быть наше фото 😄\n' + texts.bonuses_none)
             
 
 
@@ -370,14 +355,13 @@ async def get_balance(user_id):
 # TABS вкладки
 #  Вкладки МЕНЮ
 async def main_menu(user_id):
-
      await bot.send_message(user_id, "🟢 Кнопки внизу 🔢 ⬇️", reply_markup=kb.menu_buttons_reply_markup)
 
     #  await bot.send_message(user_id, " Все  вкладки  главного  меню  ", reply_markup=kb.menu_markup)
 
 async def profile_tub(user_id):
     user_info_text = "🪪 Профиль\n\n" + await database.user_info( user_id)
-    await bot.send_message(user_id, user_info_text, disable_web_page_preview=True, reply_markup=kb.profile_markup)
+    await bot.send_message(user_id, user_info_text, disable_web_page_preview=True)
 
 async def level_tub(user_id):
     user = await database.get_user(user_id)
@@ -391,6 +375,9 @@ async def level_tub(user_id):
     except:
         await bot.send_message(user_id, f"\nВаш уровень: {level}", reply_markup=kb.level_markup)
 
+async def settings_tub(user_id):
+     await bot.send_message(user_id, f"\nНастройки",)
+
 async def balance_tub(user_id):
     balance_text = await get_balance(user_id)
 
@@ -398,8 +385,6 @@ async def balance_tub(user_id):
         await bot.send_photo(user_id, photo=config.photo_ids_test['restate_grow_liquid'], caption=f'{balance_text}', reply_markup=kb.balance_control_markup)
     except:
         await bot.send_message(user_id, f'{balance_text}', reply_markup=kb.balance_control_markup)
-
-
 
 async def partners_tub(user_id):
     user = await database.get_user(user_id)
@@ -414,6 +399,10 @@ async def partners_tub(user_id):
     except:
         await bot.send_message(user_id, "💎 Партнеры" +f'\n\nВаш Лид не найден' 
             + f"\n\n\nВаши рефералы: {referrals}", reply_markup=kb.partners_markup)
+        
+async def resources_tub(user_id):
+    await bot.send_message(user_id, texts.resurses_text)
+
 
 async def bonuses_tub(user_id):
     try:
@@ -426,23 +415,19 @@ async def bonuses_tub(user_id):
                                 + "\nДоступно бонусов: " + f"{bonuses_available}", reply_markup=kb.bonuses_markup)
     except:
         await bot.send_message(user_id, "Пользователь не найден. Перезагрузите бота")
-        
-
-    await bot.send_message(user_id, texts.resurses_text, reply_markup=kb.resources_markup)
-
 
 async def info_tub(user_id):
     await bot.send_message(user_id, "🔎 Инфо"+ texts.info_text, reply_markup=kb.info_markup)
 
 async def switch_tubs(code , user_id):
-    if code == "menu":
-        await utils.main_menu(user_id)
-    elif code == "profile":
+    if code == "profile":
         await utils.profile_tub(user_id)
     elif code == "resources":
         await utils.resources_tub(user_id)
     elif code == "level":
         await utils.level_tub(user_id)
+    elif code == "settings":
+        await utils.settings_tub(user_id)
     elif code == "balance":
         await utils.balance_tub(user_id)
     elif code == "partners":
@@ -560,7 +545,9 @@ async def start_guide4(user_id):
     await asyncio.sleep(1)
     await bot.send_message(user_id, texts.start_guide4_text, disable_web_page_preview=True)
     await asyncio.sleep(2)
-    await bot.send_message(user_id, texts.start_guide4_text_2, reply_markup=kb.menu_button_markup)
+    await bot.send_message(user_id, texts.start_guide4_text_2)
+    await main_menu(user_id)
+    await bot.send_message(user_id, 'Проверьте баланс ⬇️')
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
         session.commit()
