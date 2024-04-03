@@ -350,7 +350,7 @@ async def get_balance(user_id):
 # TABS вкладки
 #  Вкладки МЕНЮ
 async def main_menu(user_id):
-     await bot.send_message(user_id,  reply_markup=kb.menu_buttons_reply_markup) #"🟢 Кнопки внизу 🔢 ⬇️",
+     await bot.send_message(user_id, "🟢 Кнопки внизу 🔢 ⬇️", reply_markup=kb.menu_buttons_reply_markup) #
 
     #  await bot.send_message(user_id, " Все  вкладки  главного  меню  ", reply_markup=kb.menu_markup)
 
