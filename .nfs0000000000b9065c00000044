@@ -1,0 +1,25 @@
+# BOT_TOKEN = '6962669976:AAGYQ-6QLNl5ge3HbEUwYOeDSzTxDvKzRlw'  # production
+BOT_TOKEN = '7104978667:AAFhCstoBmiPot00eNzhWBAchv95YcLpt1A'  # test
+
+# Evgeniy
+# MY_ID = 197126466
+# https://t.me/Level_sup_bot?start=MTk3MTI2NDY2
+
+levels_guide_id = 6251757715
+
+DB_FILENAME = 'botuploads.db'
+db_url = '//data/bot.db'
+
+# production
+# photo_ids_test = {'travolta': 'AgACAgIAAxkBAAIzSmYHUfuo0DcPGyj7mwAByCr53bpHhQACVNUxG2M7QEgzWdI_jHBtOwEAAwIAA20AAzQE',
+#               'choose_your_level': 'AgACAgIAAxkBAAIzR2YHUc6tN-UIpSbkU8YKnm_vK6klAAJT1TEbYztASFROeNiNbagBAQADAgADeQADNAQ',
+#               'bonus_open': 'AgACAgIAAxkBAAIzRGYHUV0c6mJYqY1BULMG55q-QxoCAAJR1TEbYztASA8PjnieQWONAQADAgADbQADNAQ',
+#               'restate_grow_liquid': 'AgACAgIAAxkBAAIzTWYHUjYtypF4Y7UzvnPPNR06EmB0AAJV1TEbYztASJLXNe5O_V1MAQADAgADeQADNAQ',
+#               }
+
+# test
+photo_ids_test = {'travolta': 'AgACAgIAAxkBAAIGDmYDGxT-ll44gRkr-R6sgFliUTdiAAK82TEbjsgYSHnT_47idacFAQADAgADbQADNAQ',
+              'choose_your_level': 'AgACAgIAAxkBAAIGEWYDHHDuP4C52KYM4AfaEuSkAhn-AAK12TEbjsgYSJ2Qt-Z7gxEoAQADAgADeQADNAQ',
+              'bonus_open': 'AgACAgIAAxkBAAIGFGYDHKRNtWLMvW43ReKV_YnaTR6xAALd2TEbjsgYSG5vFR38d6UcAQADAgADbQADNAQ',
+              'restate_grow_liquid': 'AgACAgIAAxkBAAIGF2YDHPPeEJ_cs7oSeqMbpycKs4ULAALk2TEbjsgYSITh8mSocqlbAQADAgADeQADNAQ',
+              }
