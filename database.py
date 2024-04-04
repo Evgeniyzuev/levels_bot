@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 
 # url_object = URL.create("/data/bot.db")
 engine = create_engine("sqlite:////data/bot.db")
-# conn = sqlite3.connect('/data/bot.db')
+# engine = create_engine("sqlite:////data/bot.db")
 
 Base = declarative_base()
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -11,6 +11,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.chat_action import ChatActionMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 # from aiogram.contrib.middlewares.logging import LoggingMiddleware
+import pytz
 
 
 # import config
@@ -24,7 +25,7 @@ async def main():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    scheduler = AsyncIOScheduler()
+    scheduler = AsyncIOScheduler(timezone=pytz.timezone('Europe/Moscow'))
     scheduler.add_job(utils.good_morning_all, 'cron', minute=0)
     # scheduler.add_job(utils.good_morning_all, 'cron', hour=8)
     scheduler.start()
