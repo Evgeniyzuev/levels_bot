@@ -92,10 +92,7 @@ async def get_or_create_user(user_id, user_name, referral_link, referrer_id,):  
         await bot.send_message(user_id, text)
     # database.local_users[user_id] = user
     # local_user = database.local_users[user_id]
-
     # await bot.send_message(user_id, f"Добавлен {user.user_name}\nс балансом {user.restate}")  
-
-    await bot.send_message(user_id, f"Добавлен {user.user_name}\nс балансом {user.restate}")  
 
     return user 
 
@@ -181,7 +178,7 @@ level_20_channel_link = 'https://t.me/+wO5a1f6vPb4xN2My'
 
 
 # local_users = {}
-ubicoin = 250
+basecoin = 1
 gamma = {}
 payment_to_check = {}
 

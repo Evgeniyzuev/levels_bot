@@ -282,6 +282,9 @@ async def process_amount(message: Message, state: FSMContext) -> None:
         if user.liquid_wallet < amount or user.liquid_wallet <= 0:
             await message.answer(f'Недостаточно средств')
             await state.set_state(None)
+        elif amount < 100:
+            await message.answer(f'Вывод от 100 рублей без комиссии')
+            await state.set_state(None)
         else:
             database.payout[user_id] = amount
             await state.set_state(Form.requisites_entering_state)
@@ -434,10 +437,13 @@ async def process_amount(message: Message, state: FSMContext) -> None:
         await bot.send_message(user_id, 'продажа недвижимости доступна с уровня 1')
     else:
         await state.update_data(amount=message.text)
+        restate_require =(250 * database.basecoin) * (2 ** (user.level))
+        await bot.send_message(user_id, f'Требование уровня по недвижимости: {restate_require} рублей\nНедвижимость ниже требования \
+                               приведет к заморозке уровня и дохода\nДоступно к продаже: {user.restate - restate_require} рублей\n')
         try:
             amount = int(message.text)
             if amount < 0: amount = -1*amount
-            if user.restate < int(message.text):
+            if (user.restate - restate_require) < int(message.text):
                 await message.answer(f'Недостаточно средств')
             else:
                 await utils.add_restate(user_id, (-1)*int(amount))

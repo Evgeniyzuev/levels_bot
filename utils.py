@@ -29,8 +29,8 @@ async def add_bonus(user_id):
 async def up_level(user_id):
     user = await database.get_user(user_id)  
     next_level = (user.level)+1
-    restate_require = database.ubicoin * (2 ** (next_level))
-    lead_grace = database.ubicoin * (2 ** (next_level))
+    restate_require = (250 * database.basecoin) * (2 ** (next_level))
+    lead_grace = (250 * database.basecoin) * (2 ** (next_level))
     balance = user.restate + user.grow_wallet + user.liquid_wallet
     # delta = (lead_grace + restate_require) - balance
     # database.gamma[user_id] = lead_grace - (user.grow_wallet+user.liquid_wallet)
@@ -56,6 +56,7 @@ async def up_level(user_id):
 
 
 async def good_morning_all():
+    database.basecoin = database.basecoin * (1 + 0.0005)
     for user in await database.get_all_users():
         user_id = user.user_id
         await good_morning(user_id)
@@ -81,8 +82,8 @@ async def up_me(user_id):
         user = await database.get_user(user_id)
         current_leader_id = user.current_leader_id
         current_leader = await database.get_user(current_leader_id)
-        restate_require = database.ubicoin * (2 ** (user.level+1))
-        lead_grace = database.ubicoin * (2 ** (user.level+1)) 
+        restate_require =(250 * database.basecoin) * (2 ** (user.level+1))
+        lead_grace = (250 * database.basecoin) * (2 ** (user.level+1)) 
         if (restate_require-user.restate) > 0:
           database.gamma[user_id] = lead_grace-(user.grow_wallet + user.liquid_wallet-(restate_require-user.restate)) 
         else:  
@@ -350,7 +351,7 @@ async def get_balance(user_id):
 # TABS вкладки
 #  Вкладки МЕНЮ
 async def main_menu(user_id):
-     await bot.send_message(user_id, "🟢 Кнопки внизу 🔢 ⬇️", reply_markup=kb.menu_buttons_reply_markup) #
+     await bot.send_message(user_id, "🟢 Кнопки внизу ⬇️", reply_markup=kb.menu_buttons_reply_markup) #
 
     #  await bot.send_message(user_id, " Все  вкладки  главного  меню  ", reply_markup=kb.menu_markup)
 
