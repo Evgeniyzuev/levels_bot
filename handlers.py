@@ -49,7 +49,7 @@ class Form(StatesGroup):
 async def start_handler( callback_query: types.CallbackQuery, command: CommandObject): #message: Message,
     user_name = callback_query.from_user.full_name
     user_id = callback_query.from_user.id
-    await callback_query.message.delete()
+    # await callback_query.message.delete()
     # await bot.send_message(user_id, f"{user_name}, привет! Рад видеть! 🤗")
     try:
         args = command.args
