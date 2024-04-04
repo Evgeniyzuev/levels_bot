@@ -47,29 +47,19 @@ class Form(StatesGroup):
 # @dp.message(Command("start"))
 @dp.message(CommandStart(deep_link=True))
 async def start_handler( callback_query: types.CallbackQuery, command: CommandObject): #message: Message,
-    # user_id = callback_query.message.from_user.id
-
-    try:
-        user_name = callback_query.from_user.full_name
-        user_id = callback_query.from_user.id
-        await bot.send_message(user_id, f"{user_name}, привет! Рад видеть! 🤗")
-    finally:
-        pass
-
-# Referrer ID
+    user_name = callback_query.from_user.full_name
+    user_id = callback_query.from_user.id
+    await callback_query.message.delete()
+    # await bot.send_message(user_id, f"{user_name}, привет! Рад видеть! 🤗")
     try:
         args = command.args
         referrer_id = decode_payload(args)
     except:
-        await bot.send_message(user_id, text='❗️ Не могу расшифровать реферальную ссылку ❗️')
+        await bot.send_message(user_id, text='❗️ Не валидная реферальная ссылка ❗️')
         referrer_id = 0
-
-    await bot.send_message(user_id, text=f'ВНИМАНИЕ❗️❗️❗️\nБот работает в тестовом режиме\n❗️Никаких выплат не будет до релиза')
-
-
+    # await bot.send_message(user_id, text=f'ВНИМАНИЕ❗️❗️❗️\nБот работает в тестовом режиме\n❗️Никаких выплат не будет до релиза')
  # TRRRRRYYYY DATABASE
     # TRRRRRYYYY DATABASE
-
     referral_link = await create_start_link(bot,str(user_id), encode=True)
     user = await database.get_or_create_user(user_id, user_name, referral_link, referrer_id)
     if user.bonuses_gotten < 2 :
@@ -110,6 +100,8 @@ async def process_open_bonus_button(callback_query: types.CallbackQuery): #messa
     user = await database.get_user(user_id)
     bonuses_gotten = user.bonuses_gotten
     bonuses_available = user.bonuses_available
+    if user.guide_stage == 1:
+        await callback_query.message.delete()
     if bonuses_available > 0:
         if bonuses_gotten-bonuses_available == 1:
             try:
@@ -382,7 +374,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     try:
         amount = int(message.text)
         if amount < 0: amount = -1*amount
-        if user.grow_wallet < int(amount):
+        if user.liquid_wallet < int(amount):
             await message.answer(f'Недостаточно средств')
         else:
             await utils.add_liquid(user_id, (-1)*int(amount))
@@ -425,9 +417,10 @@ async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSM
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.restate_down)
+    restate_require =(250 * database.basecoin) * (2 ** (user.level))
 
     # await utils.up_liquid(user_id)
-    await bot.send_message(user_id, f'Restate -> Grow\nКоммиссия 10%\nДоступно: {user.restate} рублей\nВведите сумму:')
+    await bot.send_message(user_id, f'Restate -> Grow\nКоммиссия 10%\nДоступно: {user.restate-restate_require} рублей\nВведите сумму:')
 
 @dp.message(StateFilter(Form.restate_down))
 async def process_amount(message: Message, state: FSMContext) -> None:
@@ -439,7 +432,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
         await state.update_data(amount=message.text)
         restate_require =(250 * database.basecoin) * (2 ** (user.level))
         await bot.send_message(user_id, f'Требование уровня по недвижимости: {restate_require} рублей\nНедвижимость ниже требования \
-                               приведет к заморозке уровня и дохода\nДоступно к продаже: {user.restate - restate_require} рублей\n')
+                               приведет к заморозке уровня и дохода\nЗаморозка доступна с уровня 5\nДоступно к продаже: {user.restate - restate_require} рублей\n')
         try:
             amount = int(message.text)
             if amount < 0: amount = -1*amount
@@ -466,14 +459,18 @@ async def photo_handler(message: Message):
 @dp.callback_query(F.data == "check_subscribe_button")
 async def check_subs(callback_query: types.CallbackQuery):
         user_id = callback_query.from_user.id
-        await utils.start_guide3(user_id)    
+        user_channel_status = await bot.get_chat_member(chat_id='-1001973511610', user_id=user_id)
+        if user_channel_status != 'left' and user_channel_status.status in ['creator', 'member', 'ChatMemberMember']:
+               await callback_query.message.delete()
+               await utils.start_guide3(user_id)   
+        else: await callback_query.answer("Вы не подписаны на канал")
     
-@dp.callback_query(F.data == "no_subscribtion")
-async def check_subs(callback_query: types.CallbackQuery):
-    user_id = callback_query.from_user.id
-    user = await database.get_user(user_id)
-    if user.guide_stage == 2:
-        await utils.start_guide3_nosub(user_id) 
+# @dp.callback_query(F.data == "no_subscribtion")
+# async def check_subs(callback_query: types.CallbackQuery):
+#     user_id = callback_query.from_user.id
+#     user = await database.get_user(user_id)
+#     if user.guide_stage == 2:
+#         await utils.start_guide3_nosub(user_id) 
 
 @dp.callback_query(F.data == "check_done_button")
 async def check_done(callback_query: types.CallbackQuery):

@@ -5,6 +5,7 @@ from aiogram import Bot, types
 # from aiogram.dispatcher import Dispatcher
 # from aiogram.utils import executor
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table, DateTime, FLOAT,DATETIME
+from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import select, update
@@ -13,7 +14,9 @@ from sqlalchemy import select, update
 from datetime import datetime, timedelta
 
 
+url_object = URL.create("/data/bot.db")
 engine = create_engine("sqlite:///data/bot.db")
+# conn = sqlite3.connect('/data/bot.db')
 # engine = create_engine("/data/bot.db")
 
 Base = declarative_base()

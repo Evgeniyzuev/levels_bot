@@ -446,32 +446,26 @@ async def switch_tubs(code , user_id):
 # Про Уровни. Даем первый бонус. Открывайте.
 async def start_guide1(user_id):
 
-    try:
-        await bot.send_photo(user_id, photo=config.photo_ids_test['choose_your_level'],caption=texts.start_guide1_text)
-    except:
-        await bot.send_message(user_id, texts.start_guide1_text)
-
-    await asyncio.sleep(1)
-   
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
         user.guide_stage  = 1
         if user.bonuses_gotten  == 0:
            await utils.add_bonus(user_id)
-        elif user.bonuses_gotten  >= 1:
-           await bot.send_message(user_id, 'Хм...\nКажется, вы уже получили первый бонус')
+        # elif user.bonuses_gotten  >= 1:
+        #    await bot.send_message(user_id, 'Хм...\nКажется, вы уже получили первый бонус')
         session.commit()
-    await bot.send_message(user_id,"Начнем с небольшого бонуса", reply_markup=kb.bonus_button)
+
+    user = await database.get_user(user_id)
+    user_name = user.user_name
+    try:
+        await bot.send_photo(user_id, photo=config.photo_ids_test['choose_your_level'],  caption= f'Привет, {user_name} !' +texts.start_guide1_text, reply_markup=kb.bonus_button)
+    except:
+        await bot.send_message(user_id, f'Привет, {user_name} 😊' + texts.start_guide1_text, reply_markup=kb.bonus_button)
+    # await bot.send_message(user_id,"Начнем с небольшого бонуса", reply_markup=kb.bonus_button)
 
 # Открывам бонус 1. Про бонусы. Для второго бонуса - подписка на канал
 async def start_guide2(user_id):
-    await asyncio.sleep(1)
-    await bot.send_message(user_id, "Сначала бонусы могут содежать\nот 10 до 50 рублей.\n\nДальше - больше 🔼")
-    await asyncio.sleep(1)
-    await bot.send_message(user_id, "Можно получить следующий бонус за 2 простых действия:")
-    await asyncio.sleep(1)
-    await bot.send_message(user_id, "1. Подписка на канал", reply_markup=kb.subscribe_buttons)
-    # database.get_user(user_id).guide_stage = 2
+    await bot.send_message(user_id, texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
 
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
@@ -483,34 +477,20 @@ async def start_guide2(user_id):
 async def start_guide3(user_id):  
         with database.Session() as session:
             user = session.query(User).filter(User.user_id == user_id).first() 
-            user_channel_status = await bot.get_chat_member(chat_id='-1001973511610', user_id=user_id)
-            if user_channel_status != 'left':
-
-                # if user_channel_status.status == "creator" or user_channel_status.status == "member" or user_channel_status.status == 'ChatMemberMember':
-                if user_channel_status.status in ['creator', 'member', 'ChatMemberMember']:
-
-                    # database.get_user(user_id).guide_stage  = 3
-                    user.guide_stage  = 3
-                    if user.bonuses_gotten  == 1:
-                        await utils.add_bonus(user_id)
-                    elif user.bonuses_gotten  >= 2:
-                        await bot.send_message(user_id, 'Хм...\nКажется, вы уже получили 2 бонуса')
-                    session.commit()
-                    await bot.send_message(user_id, 'Спасибо за подписку')
-                    await bot.send_message(user_id, '2. Поделиться СВОЕЙ реферальной ссылкой в ТГ.')
-                    await asyncio.sleep(2)
-                    referral_link = user.referral_link 
-
-                    try:
-                        await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'],\
-                                caption= texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️")
-                    except:
-                        await bot.send_message(user_id, 'Здесь могло быть наше фото 😄\n' + texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️")
-
-                    await asyncio.sleep(2)
-                    await bot.send_message(user_id, texts.start_guide3_text_2, reply_markup=kb.check_done_button)
-                else:
-                    await bot.send_message(user_id, 'Нет подписки. Можно продолжить без подписки и потерять следующий бонус 😱', reply_markup=kb.subscribe_buttons2)
+            user.guide_stage  = 3
+            if user.bonuses_gotten  == 1:
+                await utils.add_bonus(user_id)
+            elif user.bonuses_gotten  >= 2:
+                await bot.send_message(user_id, 'Хм...\nКажется, вы уже получили 2 бонуса')
+            session.commit()
+            await bot.send_message(user_id, '2. Поделиться СВОЕЙ реферальной ссылкой в ТГ.')
+            referral_link = user.referral_link 
+            try:
+                await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'],\
+                        caption= texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️")
+            except:
+                await bot.send_message(user_id, 'Здесь могло быть наше фото 😄\n' + texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️")
+            await bot.send_message(user_id, texts.start_guide3_text_2, reply_markup=kb.check_done_button)
 
 
 
@@ -524,7 +504,7 @@ async def start_guide3_nosub(user_id):
         session.commit()
     await bot.send_message(user_id, '☹️')
     await bot.send_message(user_id, '2. Поделиться своей реферальной ссылкой в ТГ.')
-    await asyncio.sleep(2)
+
     referral_link = user.referral_link 
 
     try:
@@ -533,13 +513,13 @@ async def start_guide3_nosub(user_id):
     except:
         await bot.send_message(user_id, 'Здесь могло быть наше фото 😄\n' + texts.start_guide3_text_1 + f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n❗️ ♻️ 🔁 РЕПОСТ тут ➡️ ➡️ ➡️")
 
-    await asyncio.sleep(2)
+
 
 
 
 async def start_guide3_1(user_id):
     await bot.send_message(user_id, 'OK')
-    await asyncio.sleep(1)
+
     await bot.send_message(user_id, 'А вот и бонус!', reply_markup=kb.bonus_button)
 
 
@@ -548,9 +528,9 @@ async def start_guide4(user_id):
         user = session.query(User).filter(User.user_id == user_id).first()
         user.guide_stage  = 4
         session.commit()
-    await asyncio.sleep(1)
+
     await bot.send_message(user_id, texts.start_guide4_text, disable_web_page_preview=True)
-    await asyncio.sleep(2)
+
     await bot.send_message(user_id, texts.start_guide4_text_2)
     await main_menu(user_id)
     await bot.send_message(user_id, 'Проверьте баланс ⬇️')

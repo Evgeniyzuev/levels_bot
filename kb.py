@@ -16,7 +16,7 @@ add_balance_ready = [InlineKeyboardButton(text="Перевод отправле�
 get_and_open_bonus_button = [InlineKeyboardButton(text="🎁 Получить Бонус", callback_data="get_and_open_bonus", one_time_keyboard = True)]
 check_done_button = [[InlineKeyboardButton(text="Готово!", callback_data="check_done_button", one_time_keyboard = True)]]
 subscribe_buttons = [[InlineKeyboardButton(text="Подписаться", url='https://t.me/Levels_up')],[InlineKeyboardButton(text="Готово!", callback_data="check_subscribe_button", one_time_keyboard = True)]]
-subscribe_buttons2 = [[InlineKeyboardButton(text="Подписаться", url='https://t.me/Levels_up')],[InlineKeyboardButton(text="Готово!", callback_data="check_subscribe_button", one_time_keyboard = True)],[InlineKeyboardButton(text="Продолжить без бонуса 🚫", callback_data="no_subscribtion", one_time_keyboard = True)]]
+# subscribe_buttons2 = [[InlineKeyboardButton(text="Подписаться", url='https://t.me/Levels_up')],[InlineKeyboardButton(text="Готово!", callback_data="check_subscribe_button", one_time_keyboard = True)],[InlineKeyboardButton(text="Продолжить без бонуса 🚫", callback_data="no_subscribtion", one_time_keyboard = True)]]
 share_button = [[InlineKeyboardButton(text="🔗 Поделиться", callback_data="share_button", one_time_keyboard = True)]]
 # transfer_button = [[InlineKeyboardButton(text=" Перевод", callback_data="transfer", one_time_keyboard = True)]]
 # pay_button = [[InlineKeyboardButton(text=" Оплата", callback_data="pay", one_time_keyboard = True)]]
@@ -74,7 +74,7 @@ admin_payout = InlineKeyboardMarkup(inline_keyboard=[[admin_payout]], one_time_k
 changed_amount_payment_confirm = InlineKeyboardMarkup(inline_keyboard=[[changed_amount_payment_confirm]], one_time_keyboard = True)
 check_user_payment = InlineKeyboardMarkup(inline_keyboard=[[check_user_payment]], one_time_keyboard = True)
 # no subscribe button markup
-subscribe_buttons2 = InlineKeyboardMarkup(inline_keyboard=subscribe_buttons2, one_time_keyboard = True)
+# subscribe_buttons2 = InlineKeyboardMarkup(inline_keyboard=subscribe_buttons2, one_time_keyboard = True)
 share_button = InlineKeyboardMarkup(inline_keyboard=share_button)
 up_me = InlineKeyboardMarkup(inline_keyboard=[up_me]) 
 add_grow = InlineKeyboardMarkup(inline_keyboard=[add_grow])
