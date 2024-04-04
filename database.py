@@ -1,5 +1,6 @@
 import asyncio
 import database
+import config
 from misc import dp, bot
 from aiogram import Bot, types
 # from aiogram.dispatcher import Dispatcher
@@ -15,7 +16,8 @@ from datetime import datetime, timedelta
 
 
 # url_object = URL.create("/data/bot.db")
-engine = create_engine("sqlite:////data/bot.db")
+db_url = 'sqlite://'+ config.db_url  
+engine = create_engine(db_url)
 # engine = create_engine("sqlite:////data/bot.db")
 
 Base = declarative_base()
