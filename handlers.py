@@ -13,8 +13,9 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from aiogram.filters import Command, CommandStart, CommandObject, StateFilter
 from aiogram.utils.deep_linking import create_start_link, decode_payload
-from sqlalchemy.sql import func
-from aiogram.methods.get_chat import GetChat
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+# from sqlalchemy.sql import func
+# from aiogram.methods.get_chat import GetChat
 from aiogram.types import (
     KeyboardButton,
     Message,
@@ -102,6 +103,10 @@ async def process_open_bonus_button(callback_query: types.CallbackQuery): #messa
     bonuses_available = user.bonuses_available
     if user.guide_stage == 1:
         await callback_query.message.delete()
+    if user.guide_stage == 3:
+        await callback_query.message.delete()
+
+        
     if bonuses_available > 0:
         if bonuses_gotten-bonuses_available == 1:
             try:
@@ -111,7 +116,7 @@ async def process_open_bonus_button(callback_query: types.CallbackQuery): #messa
                 await bot.send_message(user_id, text="не получилось")   
     await utils.open_bonus(user_id)
     if user.guide_stage == 1:
-        await utils.start_guide2(user_id)  
+        await utils.start_guide2(user_id, callback_query)  
     elif user.guide_stage == 3:
         await utils.start_guide4(user_id)
 
@@ -477,14 +482,43 @@ async def check_done(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     if user.guide_stage == 3:
-        await utils.start_guide3_1(user_id)
+        await bot.send_message(user_id, 'А вот и бонус!', reply_markup=kb.bonus_button)
+    if user.guide_stage == 4:
+        # message_id = callback_query.message.message_id
+        # await bot.edit_message_text(chat_id=user_id, message_id=message_id, text=texts.start_guide4_text_2)
+        # await bot.send_message(user_id, texts.start_guide4_text_2)
+        file = types.InputMediaPhoto(media=config.photo_ids_test['bonus_open'], caption=texts.start_guide4_text_2)
+        await callback_query.message.edit_media(file)
+        await utils.main_menu(user_id)
+
+
+
+# @dp.callback_query_handler(text="update_photo")
+# async def photo_update(query: types.CallbackQuery):
+#     # file_path = "files/foods/pelmeni.png"
+#     reply_markup = InlineKeyboardMarkup().add(
+#         InlineKeyboardButton(text="Updated button", callback_data="dont_click_me")
+#     )
+#     file = types.InputMediaPhoto(media=types.InputFile(config.photo_ids_test['bonus_open']), caption="Updated caption :)")
+
+#     await query.message.edit_media(file, reply_markup=reply_markup)
+
+# @dp.message(F.data == "next")
+# async def next(callback_query: types.CallbackQuery):
+#     await bot.send_message(user_id, "works")
+#     user_id = callback_query.from_user.id
+#     message_id = callback_query.message.message_id
+#     await callback_query.message.delete()
+#     # await bot.edit_message_text(user_id, message_id, texts.start_guide4_text_2)
+#     await bot.send_message(user_id, texts.start_guide4_text_2)
+#     await utils.main_menu(user_id)
 
 
 # SWITCH TABS
 
 switch_tabs_data =      ["profile"   , "resources"   , "level", "settings" , "balance"  , "partners"  , "bonuses"   , "info"     ] 
-switch_tabs_text=      ["Профиль"   , "Ресурсы"     , "Уровень"  , "Настройки"  , "Баланс"     , "Партнеры"    , "Бонусы"    , "Инфо"     ]
-switch_tabs_emoji_text=["😃\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "⚙️\nНастройки", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "🔎\nИнфо"]
+switch_tabs_text=      ["Профиль"   , "Ресурсы"     , "Уровень"  , "Настрой"  , "Баланс"     , "Партнеры"    , "Бонусы"    , "Инфо"     ]
+switch_tabs_emoji_text=["😃\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "⚙️\nНастрой", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "🔎\nИнфо"]
 switch_tabs_commands = ["/profile"  , "/resources"    , "/level"     , "/settings"   , "/balance"   , "/partners"   , "/bonuses"    , "/info"    ]
 
 @dp.callback_query(F.data)
@@ -500,6 +534,8 @@ async def main_menu(msg: Message):
 @dp.message(F.data == "menu")
 async def main_menu(callback_query: types.CallbackQuery):
     await utils.main_menu(user_id=callback_query.from_user.id)
+
+
 
        
 @dp.message(F.text)  

@@ -32,6 +32,7 @@ admin_payout = InlineKeyboardButton(text="Перевод", callback_data="admin_
 check_user_payment = InlineKeyboardButton(text="Проверить платеж", callback_data="check_user_payment", one_time_keyboard = True)
 admin_change_amount_payment = InlineKeyboardButton(text="Изменить сумму платежа", callback_data="admin_change_amount_payment", one_time_keyboard = True)
 changed_amount_payment_confirm = InlineKeyboardButton(text="Подтвердить сумму платежа", callback_data="changed_amount_payment_confirm", one_time_keyboard = True)
+next_button = InlineKeyboardButton(text="далее", callback_data="next", one_time_keyboard = True)
 
 
 
@@ -69,16 +70,19 @@ subscribe_buttons = InlineKeyboardMarkup(inline_keyboard=subscribe_buttons, one_
 
 admin_confirm_payment = InlineKeyboardMarkup(inline_keyboard=[[admin_confirm_payment],[admin_change_amount_payment]], one_time_keyboard = True)
 admin_payout = InlineKeyboardMarkup(inline_keyboard=[[admin_payout]], one_time_keyboard = True)
+next_button = InlineKeyboardMarkup(inline_keyboard=[[next_button]], one_time_keyboard = True)
 # admin_change_amount_payment = InlineKeyboardMarkup(inline_keyboard=[[admin_change_amount_payment]], one_time_keyboard = True)
 
 changed_amount_payment_confirm = InlineKeyboardMarkup(inline_keyboard=[[changed_amount_payment_confirm]], one_time_keyboard = True)
 check_user_payment = InlineKeyboardMarkup(inline_keyboard=[[check_user_payment]], one_time_keyboard = True)
+# next_button = InlineKeyboardMarkup(inline_keyboard=[[next_button]])
 # no subscribe button markup
 # subscribe_buttons2 = InlineKeyboardMarkup(inline_keyboard=subscribe_buttons2, one_time_keyboard = True)
 share_button = InlineKeyboardMarkup(inline_keyboard=share_button)
 up_me = InlineKeyboardMarkup(inline_keyboard=[up_me]) 
 add_grow = InlineKeyboardMarkup(inline_keyboard=[add_grow])
 add_balance_ready = InlineKeyboardMarkup(inline_keyboard=[add_balance_ready])
+
 # transfer_button = InlineKeyboardMarkup(inline_keyboard=transfer_button)
 # pay_button = InlineKeyboardMarkup(inline_keyboard=pay_button)
 

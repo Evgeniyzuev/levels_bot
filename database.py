@@ -159,26 +159,50 @@ level_17_channel = -1002022917818
 level_18_channel = -1002125464843
 level_19_channel = -1002124444687
 level_20_channel = -1002040773959
-level_1_channel_link = 'https://t.me/+mfZCEAzD49AxNzUy'
-level_2_channel_link = 'https://t.me/+_OWQU1CpS7xhOGJi'
-level_3_channel_link = 'https://t.me/+ENbYbjFKxyg1NzUy'
-level_4_channel_link = 'https://t.me/+izMLp0OaimhhM2Vi'
-level_5_channel_link = 'https://t.me/+pvQrvKRLQGw1NjEy'
-level_6_channel_link = 'https://t.me/+oqxA8yMvsbUxNTJi'
-level_7_channel_link = 'https://t.me/+scnpUSREb6IxNjcy'
-level_8_channel_link = 'https://t.me/+_DBX496A2rc5ZmQy'
-level_9_channel_link = 'https://t.me/+cyJ4IQpQlnY4Yzky'
-level_10_channel_link = 'https://t.me/+C6ItnmbbRKk1Njcy'
-level_11_channel_link = 'https://t.me/+qMoE-7AH3rs2M2Qy'
-level_12_channel_link = 'https://t.me/+k-2R_rKgu7xjMmMy'
-level_13_channel_link = 'https://t.me/+yYbBroNs2ttiNzdi'
-level_14_channel_link = 'https://t.me/+yaBuo2sNk6UxNmRi'
-level_15_channel_link = 'https://t.me/+WUXrIIi04ScyMzJi'
-level_16_channel_link = 'https://t.me/+GzKigNIttWEyYWJi'
-level_17_channel_link = 'https://t.me/+ZKKCiZEacFgxNzgy'
-level_18_channel_link = 'https://t.me/+BNqLnBJ2YdlkODFi'
-level_19_channel_link = 'https://t.me/+ad73g-MNUYw0Yjk6'
-level_20_channel_link = 'https://t.me/+wO5a1f6vPb4xN2My'
+# level_1_channel_link = 'https://t.me/+mfZCEAzD49AxNzUy'
+# level_2_channel_link = 'https://t.me/+_OWQU1CpS7xhOGJi'
+# level_3_channel_link = 'https://t.me/+ENbYbjFKxyg1NzUy'
+# level_4_channel_link = 'https://t.me/+izMLp0OaimhhM2Vi'
+# level_5_channel_link = 'https://t.me/+pvQrvKRLQGw1NjEy'
+# level_6_channel_link = 'https://t.me/+oqxA8yMvsbUxNTJi'
+# level_7_channel_link = 'https://t.me/+scnpUSREb6IxNjcy'
+# level_8_channel_link = 'https://t.me/+_DBX496A2rc5ZmQy'
+# level_9_channel_link = 'https://t.me/+cyJ4IQpQlnY4Yzky'
+# level_10_channel_link = 'https://t.me/+C6ItnmbbRKk1Njcy'
+# level_11_channel_link = 'https://t.me/+qMoE-7AH3rs2M2Qy'
+# level_12_channel_link = 'https://t.me/+k-2R_rKgu7xjMmMy'
+# level_13_channel_link = 'https://t.me/+yYbBroNs2ttiNzdi'
+# level_14_channel_link = 'https://t.me/+yaBuo2sNk6UxNmRi'
+# level_15_channel_link = 'https://t.me/+WUXrIIi04ScyMzJi'
+# level_16_channel_link = 'https://t.me/+GzKigNIttWEyYWJi'
+# level_17_channel_link = 'https://t.me/+ZKKCiZEacFgxNzgy'
+# level_18_channel_link = 'https://t.me/+BNqLnBJ2YdlkODFi'
+# level_19_channel_link = 'https://t.me/+ad73g-MNUYw0Yjk6'
+# level_20_channel_link = 'https://t.me/+wO5a1f6vPb4xN2My'
+
+
+level_links=[]
+level_links.append('https://t.me/+mfZCEAzD49AxNzUy')
+level_links.append('https://t.me/+_OWQU1CpS7xhOGJi')
+level_links.append('https://t.me/+ENbYbjFKxyg1NzUy')
+level_links.append('https://t.me/+izMLp0OaimhhM2Vi')
+level_links.append('https://t.me/+pvQrvKRLQGw1NjEy')
+level_links.append('https://t.me/+oqxA8yMvsbUxNTJi')
+level_links.append('https://t.me/+scnpUSREb6IxNjcy')
+level_links.append('https://t.me/+_DBX496A2rc5ZmQy')
+level_links.append('https://t.me/+cyJ4IQpQlnY4Yzky')
+level_links.append('https://t.me/+C6ItnmbbRKk1Njcy')
+level_links.append('https://t.me/+qMoE-7AH3rs2M2Qy')
+level_links.append('https://t.me/+k-2R_rKgu7xjMmMy')
+level_links.append('https://t.me/+yYbBroNs2ttiNzdi')
+level_links.append('https://t.me/+yaBuo2sNk6UxNmRi')
+level_links.append('https://t.me/+WUXrIIi04ScyMzJi')
+level_links.append('https://t.me/+GzKigNIttWEyYWJi')
+level_links.append('https://t.me/+ZKKCiZEacFgxNzgy')
+level_links.append('https://t.me/+BNqLnBJ2YdlkODFi')
+level_links.append('https://t.me/+ad73g-MNUYw0Yjk6')
+level_links.append('https://t.me/+wO5a1f6vPb4xN2My')
+
 
 
 # local_users = {}

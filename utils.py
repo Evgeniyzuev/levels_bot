@@ -31,6 +31,8 @@ async def up_level(user_id):
     next_level = (user.level)+1
     restate_require = (250 * database.basecoin) * (2 ** (next_level))
     lead_grace = (250 * database.basecoin) * (2 ** (next_level))
+    restate_require = math.ceil(restate_require)
+    lead_grace = math.ceil(lead_grace)
     balance = user.restate + user.grow_wallet + user.liquid_wallet
     # delta = (lead_grace + restate_require) - balance
     # database.gamma[user_id] = lead_grace - (user.grow_wallet+user.liquid_wallet)
@@ -114,7 +116,7 @@ async def up_me(user_id):
             balance = current_leader.restate + current_leader.grow_wallet + current_leader.liquid_wallet
             text0 = await get_balance(current_leader_id)
 
-            await bot.send_message(user_id, f'Уровень повышен 🔼: {user.level+1}\n')
+            await bot.send_message(user_id, f'Поздравляем! Уровень повышен 🔼\n\nВаш уровень: {user.level+1}\n\nСсылки: {database.level_links[user.level]}')
             await bot.send_message(current_leader_id, f'Входящий: +{lead_grace} рублей'+ text0 +f'\n\nВаш реферал {user.user_name}: {(user.level)} 🔼 {user.level+1}\
                                 \n\n*напоминание: Ваши рефералы могут достичь вашего уровня. Тогда они не смогут взять следующий уровень у вас. И они уйдут к другому Лиду')
 
@@ -242,6 +244,7 @@ async def open_bonus(user_id):
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
 
+
         if user.bonuses_available >= 1:
             user.bonuses_available-= 1
             bonus_size = float(random.randint(0, 333))
@@ -249,6 +252,7 @@ async def open_bonus(user_id):
 
             bonus_size = bonus_size ** 3
             bonus_size = bonus_size + 10.074 + (random.randint(0, 300))/100
+            bonus_size = bonus_size * database.basecoin * (1 + (user.level)/10)
             await add_restate(user_id, bonus_size)
             await add_turnover(user_id, bonus_size)
 
@@ -372,7 +376,7 @@ async def level_tub(user_id):
         await bot.send_message(user_id, f"\nВаш уровень: {level}", reply_markup=kb.level_markup)
 
 async def settings_tub(user_id):
-     await bot.send_message(user_id, f"\nНастройки",)
+     await bot.send_message(user_id, f"\nНастройки")
 
 async def balance_tub(user_id):
     user = await database.get_user(user_id)
@@ -458,14 +462,18 @@ async def start_guide1(user_id):
     user = await database.get_user(user_id)
     user_name = user.user_name
     try:
-        await bot.send_photo(user_id, photo=config.photo_ids_test['choose_your_level'],  caption= f'Привет, {user_name} !' +texts.start_guide1_text, reply_markup=kb.bonus_button)
+        await bot.send_photo(user_id, photo=config.photo_ids_test['nivelisha_hello'],  caption= f'Привет, {user_name} !' +texts.start_guide1_text, reply_markup=kb.bonus_button)
     except:
         await bot.send_message(user_id, f'Привет, {user_name} 😊' + texts.start_guide1_text, reply_markup=kb.bonus_button)
     # await bot.send_message(user_id,"Начнем с небольшого бонуса", reply_markup=kb.bonus_button)
 
 # Открывам бонус 1. Про бонусы. Для второго бонуса - подписка на канал
-async def start_guide2(user_id):
+async def start_guide2(user_id, query):
     await bot.send_message(user_id, texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
+    # file = await bot.get_file(config.photo_ids_test['bonus_open'])
+    # await query.message.edit_media(file, reply_markup=reply_markup)
+    # message = await query.message.edit_text(texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
+    # await bot.edit_message_media(media=config.photo_ids_test['bonus_open'] ,chat_id=user_id, message_id=query. texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
 
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
@@ -487,10 +495,10 @@ async def start_guide3(user_id):
             referral_link = user.referral_link 
             try:
                 await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'],\
-                        caption= texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️")
+                        caption= texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️", reply_markup=kb.check_done_button)
             except:
-                await bot.send_message(user_id, 'Здесь могло быть наше фото 😄\n' + texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️")
-            await bot.send_message(user_id, texts.start_guide3_text_2, reply_markup=kb.check_done_button)
+                await bot.send_message(user_id, 'Здесь могло быть наше фото 😄\n' + texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️", reply_markup=kb.check_done_button)
+            # await bot.send_message(user_id, texts.start_guide3_text_2, reply_markup=kb.check_done_button)
 
 
 
@@ -517,10 +525,8 @@ async def start_guide3_nosub(user_id):
 
 
 
-async def start_guide3_1(user_id):
-    await bot.send_message(user_id, 'OK')
-
-    await bot.send_message(user_id, 'А вот и бонус!', reply_markup=kb.bonus_button)
+# async def start_guide3_1(user_id):
+#     await bot.send_message(user_id, 'А вот и бонус!', reply_markup=kb.bonus_button)
 
 
 async def start_guide4(user_id):
@@ -529,14 +535,14 @@ async def start_guide4(user_id):
         user.guide_stage  = 4
         session.commit()
 
-    await bot.send_message(user_id, texts.start_guide4_text, disable_web_page_preview=True)
+    # await bot.send_message(user_id, texts.start_guide4_text, disable_web_page_preview=True, reply_markup=kb.check_done_button)
+    await bot.send_photo(user_id, photo=config.photo_ids_test['travolta'], caption=texts.start_guide4_text, reply_markup=kb.check_done_button)
 
-    await bot.send_message(user_id, texts.start_guide4_text_2)
-    await main_menu(user_id)
-    await bot.send_message(user_id, 'Проверьте баланс ⬇️')
-    with database.Session() as session:
-        user = session.query(User).filter(User.user_id == user_id).first()
-        session.commit()
+
+    # await bot.send_message(user_id, 'Проверьте баланс ⬇️')
+    # with database.Session() as session:
+    #     user = session.query(User).filter(User.user_id == user_id).first()
+    #     session.commit()
 
 
 

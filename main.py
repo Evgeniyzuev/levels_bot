@@ -1,5 +1,5 @@
 import misc
-import kb
+import config
 import handlers
 import asyncio
 import logging
@@ -24,10 +24,16 @@ async def main():
 
 
 if __name__ == "__main__":
+    # import os
+ 
+    # file_db = '/data/bot.db'
+    # if os.path.exists(file_db):
+    #     os.remove(file_db)
+
     logging.basicConfig(level=logging.INFO)
     scheduler = AsyncIOScheduler(timezone=pytz.timezone('Europe/Moscow'))
-    scheduler.add_job(utils.good_morning_all, 'cron', minute=0)
-    # scheduler.add_job(utils.good_morning_all, 'cron', hour=8)
+    # scheduler.add_job(utils.good_morning_all, 'cron', minute=0)
+    scheduler.add_job(utils.good_morning_all, 'cron', hour=8)
     scheduler.start()
     asyncio.get_event_loop().run_until_complete(main())
     # asyncio.run(main())
