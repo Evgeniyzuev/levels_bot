@@ -29,10 +29,8 @@ async def add_bonus(user_id):
 async def up_level(user_id):
     user = await database.get_user(user_id)  
     next_level = (user.level)+1
-    restate_require = (250 * database.basecoin) * (2 ** (next_level))
-    lead_grace = (250 * database.basecoin) * (2 ** (next_level))
-    restate_require = math.ceil(restate_require)
-    lead_grace = math.ceil(lead_grace)
+    restate_require =  math.ceil(250 * database.basecoin) * (2 ** (next_level))
+    lead_grace =  math.ceil(250 * database.basecoin) * (2 ** (next_level))
     balance = user.restate + user.grow_wallet + user.liquid_wallet
     # delta = (lead_grace + restate_require) - balance
     # database.gamma[user_id] = lead_grace - (user.grow_wallet+user.liquid_wallet)
