@@ -93,6 +93,7 @@ async def up_me(user_id):
         else:
 
             balance = current_leader.restate + current_leader.grow_wallet + current_leader.liquid_wallet+lead_grace
+            balance_text = f'\n\nБаланс: {balance} рублей'
             if restate_require > user.restate:
                 # user.grow_wallet-=(restate_require-user.restate)
                 await add_grow(user_id, -restate_require+user.restate)
@@ -111,12 +112,12 @@ async def up_me(user_id):
             await add_turnover(current_leader_id, lead_grace)
             await if_grow_wallet_is_negative(user_id)
                     
-            balance = current_leader.restate + current_leader.grow_wallet + current_leader.liquid_wallet
-            text0 = await get_balance(current_leader_id)
+            # balance = current_leader.restate + current_leader.grow_wallet + current_leader.liquid_wallet
+            # text0 = await get_balance(current_leader_id)
 
             await bot.send_message(user_id, f'Поздравляем! Уровень повышен 🔼\n\nВаш уровень: {user.level+1}\n\nСсылки: {database.level_links[user.level]}')
-            await bot.send_message(current_leader_id, f'Входящий: +{lead_grace} рублей'+ text0 +f'\n\nВаш реферал {user.user_name}: {(user.level)} 🔼 {user.level+1}\
-                                \n\n*напоминание: Ваши рефералы могут достичь вашего уровня. Тогда они не смогут взять следующий уровень у вас. И они уйдут к другому Лиду')
+            await bot.send_message(current_leader_id, f'Продажа: +{lead_grace} рублей'+ balance_text +f'\n\nВаш реферал {user.user_name}: {(user.level)} 🔼 {user.level+1}\
+                                \n\n*напоминание: рефералы, достигшие уровня Лида, могут уйти к другому Лиду. Для того, чтобы взять следующий уровень')
 
 
 
@@ -489,7 +490,7 @@ async def start_guide3(user_id):
             elif user.bonuses_gotten  >= 2:
                 await bot.send_message(user_id, 'Хм...\nКажется, вы уже получили 2 бонуса')
             session.commit()
-            await bot.send_message(user_id, '2. Поделиться СВОЕЙ реферальной ссылкой в ТГ.')
+            await bot.send_message(user_id, '❗️2. Поделиться СВОЕЙ реферальной ссылкой в ТГ ⬇️')
             referral_link = user.referral_link 
             try:
                 await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'],\
@@ -509,7 +510,7 @@ async def start_guide3_nosub(user_id):
                         user.bonuses_gotten = 2
         session.commit()
     await bot.send_message(user_id, '☹️')
-    await bot.send_message(user_id, '2. Поделиться своей реферальной ссылкой в ТГ.')
+    await bot.send_message(user_id, '❗️2. Поделиться своей реферальной ссылкой в ТГ ⬇️')
 
     referral_link = user.referral_link 
 
@@ -534,7 +535,7 @@ async def start_guide4(user_id):
         session.commit()
 
     # await bot.send_message(user_id, texts.start_guide4_text, disable_web_page_preview=True, reply_markup=kb.check_done_button)
-    await bot.send_photo(user_id, photo=config.photo_ids_test['travolta'], caption=texts.start_guide4_text, reply_markup=kb.check_done_button)
+    await bot.send_photo(user_id, photo=config.photo_ids_test['money_fountain'], caption=texts.start_guide4_text, reply_markup=kb.check_done_button)
 
 
     # await bot.send_message(user_id, 'Проверьте баланс ⬇️')

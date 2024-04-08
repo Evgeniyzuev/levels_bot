@@ -358,8 +358,6 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     except:
         await message.answer('Введите целое число')
     database.gamma[user_id] = amount
-    
-    # await utils.add_grow(user_id, int(amount))
     await message.answer(f'Пополнение grow_wallet:\n + {amount} рублей', reply_markup=kb.add_grow)
 
 
