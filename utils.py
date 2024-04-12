@@ -71,14 +71,13 @@ async def good_morning(user_id):
     await add_grow(user_id, add_grow_amount)
     await add_restate(user_id, add_restate_amount)
     await add_turnover(user_id, add_grow_amount+add_restate_amount)
-    text = f'\n+ {add_grow_amount + add_restate_amount} рублей\n\nGood morning, {user.user_name}!\n\nВсе в уровнях получают деньги каждый день\nМожно определить сумму комфортную для себя\nИ дойти до своего уровня дохода\n\n'
+    text = f'\n+ {add_grow_amount + add_restate_amount} рублей\n\nдоброе утро, {user.user_name} 😄\n\nВ Уровнях мы получаем деньги каждый день\n\nКакая сумма будет комфортна?'
     await bot.send_message(user_id, text)
 
 
 
 
 async def up_me(user_id):
-    # with database.Session() as session:
         user = await database.get_user(user_id)
         current_leader_id = user.current_leader_id
         current_leader = await database.get_user(current_leader_id)
@@ -91,9 +90,8 @@ async def up_me(user_id):
         if database.gamma[user_id] > 0:
             await bot.send_message(user_id,  f'Недостаточно средств: {database.gamma[user_id]} рублей')
         else:
-
             balance = current_leader.restate + current_leader.grow_wallet + current_leader.liquid_wallet+lead_grace
-            balance_text = f'\n\nБаланс: {balance} рублей'
+            balance_text = f'\n\nБаланс: '+ '%.0f' %(balance) +  'рублей'
             if restate_require > user.restate:
                 # user.grow_wallet-=(restate_require-user.restate)
                 await add_grow(user_id, -restate_require+user.restate)
@@ -367,10 +365,14 @@ async def level_tub(user_id):
     level = user.level
     leader_id = user.current_leader_id
     try:
+        if level == 0:
+            text_next_level = 'https://t.me/Levels_info/38'
+        else:
+            text_next_level = f'\n\n x2'
         current_leader = await database.get_user(leader_id)
         leader_name = current_leader.user_name
         leader_level=current_leader.level
-        await bot.send_message(user_id, f"\nВаш уровень: {level}"+f'\n\nВаш Лид сейчас:\n{leader_name}\nLevel: {leader_level}', reply_markup=kb.level_markup)
+        await bot.send_message(user_id, f"\nВаш уровень: {level}"+f'\n\nВаш Лид сейчас:\n{leader_name}\nУровень {leader_level}\n\nЧто на следующем уровне?: ' + text_next_level, reply_markup=kb.level_markup)
     except:
         await bot.send_message(user_id, f"\nВаш уровень: {level}", reply_markup=kb.level_markup)
 
