@@ -348,15 +348,9 @@ async def process_admin_send_ckeck_state(message: Message, state: FSMContext) ->
     await state.set_state(None)
 
 
-
-
-
-    
 # @dp.message(StateFilter(Form.requisites_entering_state))
 # async def process_requisites_entering_state(message: Message, state: FSMContext) -> None:
 
-
-    
 
 @dp.callback_query(F.data == "grow_wallet_up")
 async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
