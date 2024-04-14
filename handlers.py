@@ -3,6 +3,7 @@ import texts
 import utils
 import config
 import database #import SessionLocal, User
+from database import User
 
 from misc import dp, bot
 
@@ -79,13 +80,31 @@ async def start_handler( callback_query: types.CallbackQuery): #message: Message
     await bot.send_message(user_id, f"{user_name}, привет!\nВсегда рад видеть! 🤗")
     await utils.start_guide_stages(user_id)
 
-@dp.message(Command("morning"))
+@dp.message(Command("equality"))
 async def start_handler( callback_query: types.CallbackQuery): #message: Message,
     user_id = callback_query.from_user.id
     if user_id == config.levels_guide_id:
-    # user_name = callback_query.from_user.full_name
-        await bot.send_message(user_id, f'Инициирую протокол доброе утро')
-        await utils.good_morning_all()
+        await bot.send_message(config.levels_guide_id, "🔴 admin panel", reply_markup=kb.admin_panel_buttons_reply_markup) 
+        
+
+@dp.callback_query(F.data == "all_users_button")
+async def all_users_button(callback_query: types.CallbackQuery):
+    await utils.admin_show_all_users()
+
+@dp.callback_query(F.data == "reset_guide_button")
+async def reset_guide_button(callback_query: types.CallbackQuery):
+    user_id = config.levels_guide_id
+    with database.Session() as session:
+        user = session.query(User).filter(User.user_id == user_id).first()
+        user.guide_stage  = 0
+        user.bonuses_gotten  = 0
+        user.restate  = 0
+        user.grow_wallet  = 0
+        user.liquid_wallet  = 0
+        user.turnover  = 0
+        user.sales  = 0
+        session.commit()
+    await bot.send_message(user_id, "Guide reseted")
 
 
 # # добавление пользователя в канал
@@ -483,9 +502,10 @@ async def check_done(callback_query: types.CallbackQuery):
         # message_id = callback_query.message.message_id
         # await bot.edit_message_text(chat_id=user_id, message_id=message_id, text=texts.start_guide4_text_2)
         # await bot.send_message(user_id, texts.start_guide4_text_2)
-        file = types.InputMediaPhoto(media=config.photo_ids_test['bonus_open'], caption=texts.start_guide4_text_2)
+        file = types.InputMediaPhoto(media=config.photo_ids_test['choose_your_level'], caption=texts.start_guide4_text_2)
         await callback_query.message.edit_media(file)
         await utils.main_menu(user_id)
+        
 
 
 

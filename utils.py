@@ -75,6 +75,14 @@ async def good_morning(user_id):
     await bot.send_message(user_id, text)
 
 
+async def admin_show_all_users():
+    for user in await database.get_all_users():
+        user_id = user.user_id
+        user_info_text = "User: " + await database.user_info( user_id)
+        await bot.send_message(config.levels_guide_id, user_info_text, disable_web_page_preview=True)
+            
+    
+
 
 
 async def up_me(user_id):
@@ -354,10 +362,13 @@ async def get_balance(user_id):
 async def main_menu(user_id):
      await bot.send_message(user_id, "🟢 Кнопки внизу ⬇️", reply_markup=kb.menu_buttons_reply_markup) #
 
+# async def admin_panel():
+#      await bot.send_message(config.levels_guide_id, "🟢 Кнопки внизу ⬇️", reply_markup=kb.admin_panel_buttons_reply_markup) #
+
     #  await bot.send_message(user_id, " Все  вкладки  главного  меню  ", reply_markup=kb.menu_markup)
 
 async def profile_tub(user_id):
-    user_info_text = "🪪 Профиль\n\n" + await database.user_info( user_id)
+    user_info_text = "Профиль\n\n" + await database.user_info( user_id)
     await bot.send_message(user_id, user_info_text, disable_web_page_preview=True)
 
 async def level_tub(user_id):
@@ -470,7 +481,9 @@ async def start_guide1(user_id):
 
 # Открывам бонус 1. Про бонусы. Для второго бонуса - подписка на канал
 async def start_guide2(user_id, query):
-    await bot.send_message(user_id, texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
+    bonus_bottom_text = '%.2f' %(10*database.basecoin)
+    bonus_top_text = '%.2f' %(50*database.basecoin)
+    await bot.send_message(user_id, f'\nСейчас бонусы от {bonus_bottom_text} до {bonus_top_text} рублей.'+texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
     # file = await bot.get_file(config.photo_ids_test['bonus_open'])
     # await query.message.edit_media(file, reply_markup=reply_markup)
     # message = await query.message.edit_text(texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
@@ -494,36 +507,32 @@ async def start_guide3(user_id):
             session.commit()
             await bot.send_message(user_id, '❗️2. Поделиться СВОЕЙ реферальной ссылкой в ТГ ⬇️')
             referral_link = user.referral_link 
-            try:
-                await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'],\
-                        caption= texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️", reply_markup=kb.check_done_button)
-            except:
-                await bot.send_message(user_id, 'Здесь могло быть наше фото 😄\n' + texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n ♻️ 🔁 ❗️РЕПОСТ ТУТ❗️  ➡️  ➡️  ➡️", reply_markup=kb.check_done_button)
+            # try:
+            await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'],caption= texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n🔁 ❗️РЕПОСТ ТУТ❗️ ➡️ ➡️ ➡️ ➡️", reply_markup=kb.check_done_button)
+            # except:
+            # await bot.send_message(user_id, 'Здесь могло быть наше фото 😄\n' + texts.start_guide3_text_1 +f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n🔁 ❗️РЕПОСТ ТУТ❗️ ➡️ ➡️ ➡️ ➡️", reply_markup=kb.check_done_button)
             # await bot.send_message(user_id, texts.start_guide3_text_2, reply_markup=kb.check_done_button)
 
 
 
 # Без подписки на канал нет бонус
-async def start_guide3_nosub(user_id):
-    with database.Session() as session:
-        user = session.query(User).filter(User.user_id == user_id).first()  
-        user.guide_stage  = 3
-        if user.bonuses_gotten == 1:
-                        user.bonuses_gotten = 2
-        session.commit()
-    await bot.send_message(user_id, '☹️')
-    await bot.send_message(user_id, '❗️2. Поделиться своей реферальной ссылкой в ТГ ⬇️')
+# async def start_guide3_nosub(user_id):
+#     with database.Session() as session:
+#         user = session.query(User).filter(User.user_id == user_id).first()  
+#         user.guide_stage  = 3
+#         if user.bonuses_gotten == 1:
+#                         user.bonuses_gotten = 2
+#         session.commit()
+#     await bot.send_message(user_id, '☹️')
+#     await bot.send_message(user_id, '❗️2. Поделиться своей реферальной ссылкой в ТГ ⬇️')
 
-    referral_link = user.referral_link 
+#     referral_link = user.referral_link 
 
-    try:
-        await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'],\
-                caption= texts.start_guide3_text_1 + f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n❗️ ♻️ 🔁 РЕПОСТ тут ➡️ ➡️ ➡️")
-    except:
-        await bot.send_message(user_id, 'Здесь могло быть наше фото 😄\n' + texts.start_guide3_text_1 + f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n❗️ ♻️ 🔁 РЕПОСТ тут ➡️ ➡️ ➡️")
-
-
-
+#     # try:
+#     #     await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'],\
+#     #             caption= texts.start_guide3_text_1 + f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n🔁 ❗️РЕПОСТ ТУТ❗️ ➡️ ➡️ ➡️ ➡️")
+#     # except:
+#         await bot.send_message(user_id, 'Здесь могло быть наше фото 😄\n' + texts.start_guide3_text_1 + f"{referral_link}" + "\n🎁 ⬆️ Бонус здесь ⬆️ 🎁\n\n\n🔁 ❗️РЕПОСТ ТУТ❗️ ➡️ ➡️ ➡️ ➡️")
 
 
 # async def start_guide3_1(user_id):

@@ -37,6 +37,7 @@ next_button = InlineKeyboardButton(text="далее", callback_data="next", one_
 
 
 
+
 profile_buttons = []
 resources_buttons = []
 level_buttons = [up_level]
@@ -102,6 +103,11 @@ button8 = KeyboardButton(text="🔎\nИнфо")
 
 
 menu_buttons_reply_markup = ReplyKeyboardMarkup(keyboard=[[button1, button2, button3, button4], [button5, button6, button7, button8]], resize_keyboard=True)
+
+all_users_button = InlineKeyboardButton(text="all users", callback_data="all_users_button", one_time_keyboard = True)
+reset_guide_button = InlineKeyboardButton(text="reset guide", callback_data="reset_guide_button", one_time_keyboard = True)
+
+admin_panel_buttons_reply_markup = InlineKeyboardMarkup(inline_keyboard=[[all_users_button,],[reset_guide_button,]], resize_keyboard=True)
 
 
 
