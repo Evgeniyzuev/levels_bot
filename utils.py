@@ -57,9 +57,12 @@ async def up_level(user_id):
 
 async def good_morning_all():
     database.basecoin = database.basecoin * (1 + 0.0005)
+    user_count = 0
     for user in await database.get_all_users():
         user_id = user.user_id
         await good_morning(user_id)
+        user_count += 1
+    await bot.send_message(config.levels_guide_id, f'Всего {user_count} пользователей')
 
 
 async def good_morning(user_id):
@@ -76,15 +79,14 @@ async def good_morning(user_id):
 
 
 async def admin_show_all_users():
+    user_count = 0
     for user in await database.get_all_users():
+        user_count += 1
         user_id = user.user_id
-        user_info_text = "User: " + await database.user_info( user_id)
+        user_info_text = f"User {user_count}: " + await database.user_info( user_id)
         await bot.send_message(config.levels_guide_id, user_info_text, disable_web_page_preview=True)
             
     
-
-
-
 async def up_me(user_id):
         user = await database.get_user(user_id)
         current_leader_id = user.current_leader_id
