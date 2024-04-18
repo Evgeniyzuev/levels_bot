@@ -64,6 +64,7 @@ async def get_or_create_user(user_id, user_name, referral_link, referrer_id,):  
         # await bot.send_message(user_id, "пользователь загружен")
         session.close()
     if not user:
+        await bot.send_message(referrer_id, text= f"По вашей ссылке зашел пользователь:\n{user_name}\nВы получите бонус 🎁 когда пользователь откроет два бонуса.")
         with Session(expire_on_commit=False) as session:
             # await bot.send_message(user_id, "регистрация нового пользователя")
             now = datetime.now()

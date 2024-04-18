@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
     scheduler = AsyncIOScheduler(timezone=pytz.timezone('Europe/Moscow'))
-    # scheduler.add_job(utils.good_morning_all, 'cron', minute=0)
+    # scheduler.add_job(utils.good_morning_all, 'cron', second=0)
     scheduler.add_job(utils.good_morning_all, 'cron', hour=8)
     scheduler.start()
     asyncio.get_event_loop().run_until_complete(main())

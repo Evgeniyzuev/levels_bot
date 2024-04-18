@@ -57,12 +57,13 @@ async def up_level(user_id):
 
 async def good_morning_all():
     database.basecoin = database.basecoin * (1 + 0.0005)
-    user_count = 0
+    user_count = 1
     for user in await database.get_all_users():
         user_id = user.user_id
         await good_morning(user_id)
+        await bot.send_message(config.levels_guide_id, f'GM user {user_count} ')
         user_count += 1
-    await bot.send_message(config.levels_guide_id, f'Всего {user_count} пользователей')
+    
 
 
 async def good_morning(user_id):
@@ -345,7 +346,8 @@ async def start_guide_stages(user_id):
     elif user.guide_stage  == 3:
         await utils.start_guide4(user_id)
 
-    elif user.guide_stage  >= 4:
+    elif user.guide_stage  == 4:
+            user.guide_stage = 5
             await utils.main_menu(user_id)
 
 

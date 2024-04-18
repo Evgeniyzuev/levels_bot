@@ -64,12 +64,11 @@ async def start_handler( callback_query: types.CallbackQuery, command: CommandOb
     # TRRRRRYYYY DATABASE
     referral_link = await create_start_link(bot,str(user_id), encode=True)
     user = await database.get_or_create_user(user_id, user_name, referral_link, referrer_id)
-    if user.bonuses_gotten < 2 :
-        try:
-            await bot.send_message(referrer_id, text= f"По вашей ссылке зашел пользователь:\n{user_name}\nВы получите бонус 🎁 когда пользователь откроет два бонуса.")
-        finally:
-            pass 
-
+    # if user.bonuses_gotten < 2 :
+    #     try:
+    #         await bot.send_message(referrer_id, text= f"По вашей ссылке зашел пользователь:\n{user_name}\nВы получите бонус 🎁 когда пользователь откроет два бонуса.")
+    #     finally:
+    #         pass 
     await utils.start_guide_stages(user_id)
 
 
