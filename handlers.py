@@ -90,6 +90,10 @@ async def start_handler( callback_query: types.CallbackQuery): #message: Message
 async def all_users_button(callback_query: types.CallbackQuery):
     await utils.admin_show_all_users()
 
+@dp.callback_query(F.data == "all_users_level_button")
+async def all_users_level_button(callback_query: types.CallbackQuery):
+    await utils.admin_show_all_users_level()
+
 @dp.callback_query(F.data == "reset_guide_button")
 async def reset_guide_button(callback_query: types.CallbackQuery):
     user_id = config.levels_guide_id
@@ -167,10 +171,28 @@ async def process_up_me(callback_query: types.CallbackQuery):
 
 
 # Выдаёт реквизиты №1 для пополнения grow_wallet
-@dp.callback_query(F.data == "add_grow") 
+@dp.callback_query(F.data == 'show_requisites')
 async def process_add_grow(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
-    await bot.send_message(user_id, f'Пополнение grow_wallet:\n + {database.gamma[user_id]} рублей'+ texts.add_grow_text_1, reply_markup=kb.add_balance_ready)
+    await bot.send_message(user_id, f'Перевести на grow_wallet:\n + {database.gamma[user_id]} рублей'+ texts.requisites_text_1, reply_markup=kb.add_balance_ready)
+
+@dp.callback_query(F.data == 'show_requisites2')
+async def process_add_grow(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    sum = database.gamma[user_id] / database.ton_rub
+    sum = (round(sum, 4))
+    caption_text = f'Перевести на grow_wallet:\n + {sum} Toncoin'+ texts.requisites_text_2
+    await bot.send_photo(user_id, photo=config.photo_ids_test['requisites_Toncoin'], caption=caption_text, reply_markup=kb.add_balance_ready)
+    # await bot.send_message(user_id, f'Перевести на grow_wallet:\n + {database.gamma[user_id]} рублей'+ texts.requisites_text_2, reply_markup=kb.add_balance_ready)
+
+@dp.callback_query(F.data == 'show_requisites3')
+async def process_add_grow(callback_query: types.CallbackQuery):
+    user_id = callback_query.from_user.id
+    sum = database.gamma[user_id] / database.usdt_rub
+    sum = (round(sum, 2))
+    caption_text = f'Перевести на grow_wallet:\n + {sum} USDT TON'+ texts.requisites_text_3
+    await bot.send_photo(user_id, photo=config.photo_ids_test['requisites_USDT'], caption=caption_text, reply_markup=kb.add_balance_ready)
+    # await bot.send_message(user_id, f'Перевести на grow_wallet:\n + {database.gamma[user_id]} рублей'+ texts.requisites_text_3, reply_markup=kb.add_balance_ready)
 
 # Передаёт запрос на пополнение админу
 @dp.callback_query(F.data == "add_balance_ready")
@@ -190,7 +212,7 @@ async def process_add_balance_ready(callback_query: types.CallbackQuery, state: 
 async def process_user_send_ckeck_state(message: Message, state: FSMContext) -> None:
     await message.send_copy(config.levels_guide_id)
     await state.set_state(None)
-    await bot.send_message(message.from_user.id, f'Платеж в процессе')
+    await bot.send_message(message.from_user.id, f'Платеж в процессе 💤')
 
 
 # # Изменить сумму платежа вручную
@@ -220,6 +242,7 @@ async def process_confirm_payment_button(callback_query: types.CallbackQuery): #
     await utils.add_grow(user_id, amount)
     await bot.edit_message_reply_markup(config.levels_guide_id, message_id=callback_query.message.message_id, reply_markup=None )
     await bot.send_message(user_id, f'Пополнение grow_wallet:\n + {amount} рублей' )
+    await bot.send_message(config.levels_guide_id, f'User: {user_id} \nПополнение grow_wallet:\n + {amount} рублей' )
 
 # Подтвердить введенную сумму?
 @dp.message(StateFilter(Form.amount_state))
@@ -227,7 +250,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     await state.set_state(Form.amount_state_ok)
     await state.update_data(amount=message.text)
     database.payment_to_check_amount = int(message.text)
-    await message.answer(f'Пополнение grow_wallet:\n + {message.text} рублей\n\nUser ID: {database.payment_to_check_user_id}',reply_markup=ReplyKeyboardMarkup(
+    await message.answer(f'Пополнить grow_wallet:\n + {message.text} рублей\n\nUser ID: {database.payment_to_check_user_id}',reply_markup=ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text="Yes"),KeyboardButton(text="No"),]],resize_keyboard=True,),)
 
 
@@ -239,7 +262,8 @@ async def process_amount_state_ok(message: Message, state: FSMContext) -> None:
     amount = database.payment_to_check_amount
     await utils.add_grow(user_id, amount)
     await bot.send_message(user_id, f'Пополнение grow_wallet:\n + {amount} рублей' )
-    await message.answer("Готово",reply_markup=ReplyKeyboardRemove())
+    await bot.send_message(config.levels_guide_id, f'User: {user_id} \nПополнение grow_wallet:\n + {amount} рублей' )
+    # await message.answer("Готово",reply_markup=ReplyKeyboardRemove())
 
 
 # Отменить введенную сумму (нет)
@@ -347,17 +371,13 @@ async def process_admin_send_ckeck_state(message: Message, state: FSMContext) ->
     await state.set_state(None)
 
 
-# @dp.message(StateFilter(Form.requisites_entering_state))
-# async def process_requisites_entering_state(message: Message, state: FSMContext) -> None:
-
-
 @dp.callback_query(F.data == "grow_wallet_up")
 async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.grow_wallet_up)
     # await utils.up_liquid(user_id)
-    await bot.send_message(user_id, f'Grow: {user.grow_wallet} \nПополнить счёт. Введите сумму:')
+    await bot.send_message(user_id, f'Grow: {user.grow_wallet} \nПополнить счёт. Введите сумму:\n(целое число не менее 100 рублей)')
 
 @dp.message(StateFilter(Form.grow_wallet_up))
 async def process_amount(message: Message, state: FSMContext) -> None:
@@ -370,7 +390,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     except:
         await message.answer('Введите целое число')
     database.gamma[user_id] = amount
-    await message.answer(f'Пополнение grow_wallet:\n + {amount} рублей', reply_markup=kb.add_grow)
+    await message.answer(f'Пополнить grow_wallet:\n + {amount} рублей', reply_markup=kb.show_requisites_markup)
 
 
 @dp.callback_query(F.data == "liquid_to_grow")
@@ -525,10 +545,10 @@ async def check_done(callback_query: types.CallbackQuery):
 
 # SWITCH TABS
 
-switch_tabs_data =      ["profile"   , "resources"   , "level", "settings" , "balance"  , "partners"  , "bonuses"   , "info"     ] 
-switch_tabs_text=      ["Профиль"   , "Ресурсы"     , "Уровень"  , "Настрой"  , "Баланс"     , "Партнеры"    , "Бонусы"    , "Инфо"     ]
-switch_tabs_emoji_text=["😃\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "⚙️\nНастрой", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "🔎\nИнфо"]
-switch_tabs_commands = ["/profile"  , "/resources"    , "/level"     , "/settings"   , "/balance"   , "/partners"   , "/bonuses"    , "/info"    ]
+switch_tabs_data =      ["profile"   , "resources"   , "level", "settings" , "balance"  , "partners"  , "bonuses"   , "learn"     ] 
+switch_tabs_text=      ["Профиль"   , "Ресурсы"     , "Уровень"  , "Настрой"  , "Баланс"     , "Партнеры"    , "Бонусы"    , "Обучение"     ]
+switch_tabs_emoji_text=["😃\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "⚙️\nНастрой", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "📚\nОбучение"]
+switch_tabs_commands = ["/profile"  , "/resources"    , "/level"     , "/settings"   , "/balance"   , "/partners"   , "/bonuses"    , "/learn"    ]
 
 @dp.callback_query(F.data)
 async def swith_menu_tubs(callback_query: types.CallbackQuery):

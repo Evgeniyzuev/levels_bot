@@ -1,18 +1,13 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
-# menu_buttons = [
-#     [InlineKeyboardButton(text="📝\nПрофиль", callback_data="profile"),InlineKeyboardButton(text="🔗\nРесурсы", callback_data="resources")],[InlineKeyboardButton(text="🔼\nУровень", callback_data="level"),
-#     InlineKeyboardButton(text="💳\nБаланс", callback_data="balance")],[InlineKeyboardButton(text="💎\nПартнёры", callback_data="partners"), InlineKeyboardButton(text="🎁\nБонусы", callback_data="bonuses")],
-#     [InlineKeyboardButton(text="🔎\nИнфо", callback_data="info")]]
 
-# menu_button = [InlineKeyboardButton(text="🟢 Menu", callback_data="menu", one_time_keyboard = True)]
 
 profile_button = [InlineKeyboardButton(text="😃 Профиль", callback_data="profile", one_time_keyboard = True)]
 bonus_button = [InlineKeyboardButton(text="🎁 Открыть Бонус", callback_data="open_bonus", one_time_keyboard = True)]
 up_level = [InlineKeyboardButton(text="🔼 Поднять уровень", callback_data="up_level", one_time_keyboard = True)]
 up_me = [InlineKeyboardButton(text="🔼 Поднять сейчас", callback_data="up_me", one_time_keyboard = True)]
 # up_me = [InlineKeyboardButton(text="🔼 Поднять сейчас", callback_data="up_me", one_time_keyboard = True)]
-add_grow = [InlineKeyboardButton(text="🔼 Пополнить баланс", callback_data="add_grow", one_time_keyboard = True)]
-add_balance_ready = [InlineKeyboardButton(text="Перевод отправлен", callback_data="add_balance_ready", one_time_keyboard = True)]
+# add_grow = [InlineKeyboardButton(text="🔼 Пополнить баланс", callback_data="add_grow", one_time_keyboard = True)]
+add_balance_ready = [InlineKeyboardButton(text="✅ Перевод отправлен", callback_data="add_balance_ready", one_time_keyboard = True)]
 get_and_open_bonus_button = [InlineKeyboardButton(text="🎁 Получить Бонус", callback_data="get_and_open_bonus", one_time_keyboard = True)]
 check_done_button = [[InlineKeyboardButton(text="Готово!", callback_data="check_done_button", one_time_keyboard = True)]]
 subscribe_buttons = [[InlineKeyboardButton(text="Подписаться", url='https://t.me/Levels_up')],[InlineKeyboardButton(text="Готово!", callback_data="check_subscribe_button", one_time_keyboard = True)]]
@@ -20,6 +15,9 @@ subscribe_buttons = [[InlineKeyboardButton(text="Подписаться", url='h
 share_button = [[InlineKeyboardButton(text="🔗 Поделиться", callback_data="share_button", one_time_keyboard = True)]]
 # transfer_button = [[InlineKeyboardButton(text=" Перевод", callback_data="transfer", one_time_keyboard = True)]]
 # pay_button = [[InlineKeyboardButton(text=" Оплата", callback_data="pay", one_time_keyboard = True)]]
+show_requisites = InlineKeyboardButton(text="💳 ПО СБП", callback_data="show_requisites", one_time_keyboard = True)
+show_requisites2 = InlineKeyboardButton(text="💎 Toncoin", callback_data="show_requisites2", one_time_keyboard = True)
+show_requisites3 = InlineKeyboardButton(text="💵 USDT TON", callback_data="show_requisites3", one_time_keyboard = True)
 
 grow_to_liquid = InlineKeyboardButton(text="🌱🔻💧", callback_data="grow_to_liquid", one_time_keyboard = True)
 liquid_wallet_down = InlineKeyboardButton(text="💧🔻🔻", callback_data="liquid_wallet_down", one_time_keyboard = True)
@@ -43,7 +41,7 @@ resources_buttons = []
 level_buttons = [up_level]
 balance_buttons = []
 partners_buttons = [] 
-info_buttons = []
+learn_buttons = []
 bonus_buttons = [bonus_button, profile_button,]
 
 balance_control_buttons = [[restate_up, grow_wallet_up, liquid_to_grow], [restate_down, grow_to_liquid, liquid_wallet_down]]
@@ -59,7 +57,7 @@ level_markup = InlineKeyboardMarkup(inline_keyboard=level_buttons, one_time_keyb
 balance_markup = InlineKeyboardMarkup(inline_keyboard=balance_buttons, one_time_keyboard = True)
 partners_markup = InlineKeyboardMarkup(inline_keyboard=partners_buttons, one_time_keyboard = True)
 bonuses_markup = InlineKeyboardMarkup(inline_keyboard=bonus_buttons, one_time_keyboard = True)
-info_markup = InlineKeyboardMarkup(inline_keyboard=info_buttons, one_time_keyboard = True)
+learn_markup = InlineKeyboardMarkup(inline_keyboard=learn_buttons, one_time_keyboard = True)
 balance_control_markup = InlineKeyboardMarkup(inline_keyboard=balance_control_buttons, one_time_keyboard = True) # one_time_keyboard = True, 
 # balance_control_markup = InlineKeyboardMarkup(inline_keyboard=balance_control_buttons, one_time_keyboard = True) 
 
@@ -81,7 +79,8 @@ check_user_payment = InlineKeyboardMarkup(inline_keyboard=[[check_user_payment]]
 # subscribe_buttons2 = InlineKeyboardMarkup(inline_keyboard=subscribe_buttons2, one_time_keyboard = True)
 share_button = InlineKeyboardMarkup(inline_keyboard=share_button)
 up_me = InlineKeyboardMarkup(inline_keyboard=[up_me]) 
-add_grow = InlineKeyboardMarkup(inline_keyboard=[add_grow])
+# add_grow = InlineKeyboardMarkup(inline_keyboard=[add_grow])
+show_requisites_markup = InlineKeyboardMarkup(inline_keyboard=[[show_requisites],[show_requisites2],[show_requisites3]])
 add_balance_ready = InlineKeyboardMarkup(inline_keyboard=[add_balance_ready])
 
 # transfer_button = InlineKeyboardMarkup(inline_keyboard=transfer_button)
@@ -99,15 +98,17 @@ button4 = KeyboardButton(text="⚙️\nНастрой")
 button5 = KeyboardButton(text="💎\nПартнеры")
 button6 = KeyboardButton(text="🔗\nРесурсы")
 button7 = KeyboardButton(text="🎁\nБонусы")
-button8 = KeyboardButton(text="🔎\nИнфо")
+button8 = KeyboardButton(text="📚\nОбучение")
 
 
 menu_buttons_reply_markup = ReplyKeyboardMarkup(keyboard=[[button1, button2, button3, button4], [button5, button6, button7, button8]], resize_keyboard=True)
 
 all_users_button = InlineKeyboardButton(text="all users", callback_data="all_users_button", one_time_keyboard = True)
+all_users_level_button = InlineKeyboardButton(text="all users level", callback_data="all_users_level_button", one_time_keyboard = True)
 reset_guide_button = InlineKeyboardButton(text="reset guide", callback_data="reset_guide_button", one_time_keyboard = True)
 
-admin_panel_buttons_reply_markup = InlineKeyboardMarkup(inline_keyboard=[[all_users_button,],[reset_guide_button,]], resize_keyboard=True)
+
+admin_panel_buttons_reply_markup = InlineKeyboardMarkup(inline_keyboard=[[all_users_button,], [all_users_level_button,],[reset_guide_button,]], resize_keyboard=True)
 
 
 

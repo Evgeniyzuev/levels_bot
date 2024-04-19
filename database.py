@@ -208,6 +208,8 @@ level_links.append('https://t.me/+wO5a1f6vPb4xN2My')
 
 # local_users = {}
 basecoin = 1
+usdt_rub = 93
+ton_rub = 600
 gamma = {}
 payment_to_check = {}
 

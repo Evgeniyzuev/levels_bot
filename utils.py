@@ -48,7 +48,7 @@ async def up_level(user_id):
         database.gamma[user_id] = database.gamma[user_id]*100
 
         await bot.send_message(user_id, f'Следующий уровень: {next_level}\n\nRestate: {restate_require} руб\nСпасибо Лиду: {lead_grace} руб\
-                               \n\nБаланс: '+ '%.2f' %(balance) + " руб"+ f'\n\nПополните баланс на {database.gamma[user_id]} руб', reply_markup=kb.add_grow)
+                               \n\nБаланс: '+ '%.2f' %(balance) + " руб"+ f'\n\nПополните баланс на {database.gamma[user_id]} руб', reply_markup=kb.show_requisites_markup)
     else:
         await bot.send_message(user_id, f'Следующий уровень: {next_level}\n\nRestate: {restate_require} руб\nСпасибо Лиду: {lead_grace} руб\
                                \n\nБаланс: '+ '%.2f' %(balance) + " руб", reply_markup=kb.up_me)
@@ -60,8 +60,11 @@ async def good_morning_all():
     user_count = 1
     for user in await database.get_all_users():
         user_id = user.user_id
-        await good_morning(user_id)
-        await bot.send_message(config.levels_guide_id, f'GM user {user_count} ')
+        try:
+            await good_morning(user_id)
+            await bot.send_message(config.levels_guide_id, f'GM user {user_count} ')
+        except:
+            await bot.send_message(config.levels_guide_id, f'GM user {user_count} error')
         user_count += 1
     
 
@@ -83,10 +86,19 @@ async def admin_show_all_users():
     user_count = 0
     for user in await database.get_all_users():
         user_count += 1
-        user_id = user.user_id
-        user_info_text = f"User {user_count}: " + await database.user_info( user_id)
+        user_info_text = f"User {user_count}: " + await database.user_info( user.user_id)
         await bot.send_message(config.levels_guide_id, user_info_text, disable_web_page_preview=True)
-            
+
+async def admin_show_all_users_level():
+    user_count = 1
+    for user in await database.get_all_users():
+        try:
+            if user.level != 0:
+                user_info_text = f"User {user_count}: " + await database.user_info( user.user_id)
+                await bot.send_message(config.levels_guide_id, user_info_text, disable_web_page_preview=True)
+                user_count += 1
+        except:
+            await bot.send_message(config.levels_guide_id, f'GM user {user_count} error')
     
 async def up_me(user_id):
         user = await database.get_user(user_id)
@@ -364,7 +376,9 @@ async def get_balance(user_id):
 # TABS вкладки
 #  Вкладки МЕНЮ
 async def main_menu(user_id):
-     await bot.send_message(user_id, "🟢 Кнопки внизу ⬇️", reply_markup=kb.menu_buttons_reply_markup) #
+     await bot.send_message(user_id, "🟢 Кнопки внизу ⬇️", reply_markup=kb.menu_buttons_reply_markup) 
+     if user_id == config.levels_guide_id:
+         await bot.send_message(user_id, "🔴 admin panel", reply_markup=kb.admin_panel_buttons_reply_markup)
 
 # async def admin_panel():
 #      await bot.send_message(config.levels_guide_id, "🟢 Кнопки внизу ⬇️", reply_markup=kb.admin_panel_buttons_reply_markup) #
@@ -442,8 +456,8 @@ async def bonuses_tub(user_id):
     except:
         await bot.send_message(user_id, "Пользователь не найден. Перезагрузите бота")
 
-async def info_tub(user_id):
-    await bot.send_message(user_id, "🔎 Инфо"+ texts.info_text, reply_markup=kb.info_markup)
+async def learn_tub(user_id):
+    await bot.send_message(user_id, "📚 Обучение"+ texts.learn_text, reply_markup=kb.learn_markup)
 
 async def switch_tubs(code , user_id):
     if code == "profile":
@@ -460,8 +474,8 @@ async def switch_tubs(code , user_id):
         await utils.partners_tub(user_id)
     elif code == "bonuses":
         await utils.bonuses_tub(user_id)
-    elif code == "info":
-        await utils.info_tub(user_id)
+    elif code == "learn":
+        await utils.learn_tub(user_id)
 # Guide
 # Про Уровни. Даем первый бонус. Открывайте.
 async def start_guide1(user_id):
