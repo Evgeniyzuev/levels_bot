@@ -45,8 +45,10 @@ requisites_text_3 = '\n\nUSDT TON:\nUQAegScNLWtuhtDlBd2oq5Utjkm_W_NSmWlBvYU83z65
 resurses_text = '\n🔗 Ресурсы\n\nОфициальный канал:\nhttps://t.me/Levels_up\nКаналы уровней:\nhttps://t.me/Levels_info/6'
 
 
-learn_text = '\nПро Уровни: '+'https://telegra.ph/UROVNI-04-19'+'\nОсновное: ' + 'https://t.me/Levels_info/37' + '\nПредупреждение о рисках: ' + 'https://t.me/Levels_info/2' + '\nНалоги: ' + 'https://t.me/Levels_info/4' + '\nЦель Уровней: ' + 'https://t.me/Levels_info/34' + '\nПример: ' + 'https://t.me/Levels_info/35'
-
+# learn_text = '\nПро Уровни: '+'https://telegra.ph/UROVNI-04-19'+'\nОсновное: ' + 'https://t.me/Levels_info/37' + '\nПредупреждение о рисках: ' + 'https://t.me/Levels_info/2' + '\nНалоги: ' + 'https://t.me/Levels_info/4' + '\nЦель Уровней: ' + 'https://t.me/Levels_info/34' + '\nПример: ' + 'https://t.me/Levels_info/35'
+learn_text = '\n[Про Уровни](https://telegra.ph/UROVNI-04-19)\n[Основное](https://t.me/Levels_info/37)\n[Предупреждение о рисках](https://t.me/Levels_info/2)\n[Налоги](https://t.me/Levels_info/4)\n[Цель Уровней](https://t.me/Levels_info/34)\n[Пример](https://t.me/Levels_info/35)'
+# bot.send_message(message.chat.id, "[какой-нибудь текст](https://google.com)", parse_mode="MarkdownV2")
+# bot.send_message(message.chat.id, f"[какой-нибудь текст]({linck})", parse_mode="MarkdownV2")
 good_morning_text = '😄 Каждое утро может быть добрым 🥰\nО финансах я позабочусь🤖\n\nRestate: 100 +15 -> 115 \n\n\n\n'
 
 greet = ("{name}, приветствую в Уровнях! \n\n"  

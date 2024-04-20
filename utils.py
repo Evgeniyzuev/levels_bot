@@ -457,7 +457,7 @@ async def bonuses_tub(user_id):
         await bot.send_message(user_id, "Пользователь не найден. Перезагрузите бота")
 
 async def learn_tub(user_id):
-    await bot.send_message(user_id, "📚 Обучение"+ texts.learn_text, reply_markup=kb.learn_markup)
+    await bot.send_message(user_id, texts.learn_text, parse_mode="MarkdownV2", reply_markup=kb.learn_markup)
 
 async def switch_tubs(code , user_id):
     if code == "profile":
@@ -498,14 +498,10 @@ async def start_guide1(user_id):
     # await bot.send_message(user_id,"Начнем с небольшого бонуса", reply_markup=kb.bonus_button)
 
 # Открывам бонус 1. Про бонусы. Для второго бонуса - подписка на канал
-async def start_guide2(user_id, query):
+async def start_guide2(user_id):
     bonus_bottom_text = '%.2f' %(10*database.basecoin)
     bonus_top_text = '%.2f' %(50*database.basecoin)
     await bot.send_message(user_id, f'\nСейчас бонусы от {bonus_bottom_text} до {bonus_top_text} рублей.'+texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
-    # file = await bot.get_file(config.photo_ids_test['bonus_open'])
-    # await query.message.edit_media(file, reply_markup=reply_markup)
-    # message = await query.message.edit_text(texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
-    # await bot.edit_message_media(media=config.photo_ids_test['bonus_open'] ,chat_id=user_id, message_id=query. texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
 
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
