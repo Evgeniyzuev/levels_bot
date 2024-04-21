@@ -3,13 +3,15 @@ import database
 import config
 from misc import dp, bot
 from aiogram import Bot, types
+from aiogram.utils.deep_linking import create_start_link
 # from aiogram.dispatcher import Dispatcher
 # from aiogram.utils import executor
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table, DateTime, FLOAT,DATETIME
 from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import select, update
+from sqlalchemy.orm import sessionmaker
+
+# from sqlalchemy import select, update
 # from flask import Flask
 # from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
@@ -28,8 +30,6 @@ Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # user_referrer = Table('user_referrer', Base.metadata,
 #     Column('user_id', Integer, ForeignKey('users.user_id'), primary_key=True),
 #     Column('referrer_id', Integer, ForeignKey('users.user_id'), primary_key=True))
-
-
 class User(Base):
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True, index=True)
@@ -51,31 +51,48 @@ class User(Base):
     referrals = Column(String)
     bonus_cd_time = Column ( DateTime)
 
+class Referral(Base):
+    __tablename__ = "referals"
+    referrer_id = Column(Integer, ForeignKey("users.user_id"))
+    referral_id = Column(Integer, ForeignKey("users.user_id"))
+    primary_key = Column(String, primary_key=True)
+
 Base.metadata.create_all(bind=engine)
 
 # db = SQLAlchemy(app)
 # database.db = database.SessionLocal()
 
-async def get_or_create_user(user_id, user_name, referral_link, referrer_id,):   # user = await db.query(User).filter(User.id == user_id).first()
-
+async def get_or_create_user(user_id, user_name, referrer_id):   # user = await db.query(User).filter(User.id == user_id).first()
 
     with Session(expire_on_commit=False) as session:
         user = session.query(User).filter(User.user_id == user_id).first()
-        # await bot.send_message(user_id, "пользователь загружен")
+        if user:
+            if user.referrer_id != referrer_id:
+                user.referrer_id = referrer_id
+                try:
+                    # referral = session.query(Referral).filter(Referral.referrer_id == referrer_id).filter(Referral.referral_id == user_id).first()
+                    referral = Referral(referrer_id=referrer_id, referral_id=user_id, primary_key=f'{referrer_id}_{user_id}')
+                    session.add(referral)
+                    session.commit()
+                except:
+                    pass
         session.close()
     if not user:
+        referral_link = await create_start_link(bot,str(user_id), encode=True)
         await bot.send_message(referrer_id, text= f"По вашей ссылке зашел пользователь:\n{user_name}\nВы получите бонус 🎁 когда пользователь откроет два бонуса.")
         with Session(expire_on_commit=False) as session:
             # await bot.send_message(user_id, "регистрация нового пользователя")
             now = datetime.now()
-            referrers_text = ''
-            referrers_text += f'{referrer_id}'
+            # referrers_text = ''
+            # referrers_text += f'{referrer_id}'
             if user_id == 6251757715: level = 100
             else: level = 0
             user = User(user_id=user_id, user_name=user_name, referral_link=referral_link, referrer_id=referrer_id, registration_time=now, level=level,
                 restate=0, grow_wallet=0, liquid_wallet=0, turnover=0, sales=0, bonuses_available=0, bonuses_gotten=0, guide_stage=0,
-                current_leader_id=referrer_id, referrers=referrers_text, referrals = '', bonus_cd_time = now 
+                current_leader_id=referrer_id, referrers='', referrals = '', bonus_cd_time = now 
                     )
+            referral = Referral(referrer_id=referrer_id, referral_id=user_id, primary_key=f'{referrer_id}_{user_id}')
+            session.add(referral)
             session.add(user)
             session.commit()
 
@@ -88,13 +105,13 @@ async def get_or_create_user(user_id, user_name, referral_link, referrer_id,):  
         #         user.referrer_id = referrer.user_id
         #         referrer.subscribers.append(user)
     # await bot.send_message(user_id, f"Добавлен {user.user_name}\n с балансом {user.restate}")
-    try: 
-        current_leader = await database.get_user(referrer_id)
-        # text = (referrer_id +': ' + current_leader.user_name + 'lvl: ' + current_leader.level + '\n')
-        # user.referrers += text 
-    except: 
-        text = f'Ваш лид: {referrer_id} не найден в базе'
-        await bot.send_message(user_id, text)
+    # try: 
+    #     current_leader = await database.get_user(referrer_id)
+    #     # text = (referrer_id +': ' + current_leader.user_name + 'lvl: ' + current_leader.level + '\n')
+    #     # user.referrers += text 
+    # except: 
+    #     text = f'Ваш лид: {referrer_id} не найден в базе'
+    #     await bot.send_message(user_id, text)
     # database.local_users[user_id] = user
     # local_user = database.local_users[user_id]
     # await bot.send_message(user_id, f"Добавлен {user.user_name}\nс балансом {user.restate}")  
@@ -102,64 +119,94 @@ async def get_or_create_user(user_id, user_name, referral_link, referrer_id,):  
     return user 
 
 async def get_user(user_id):
-    # try:
-    #     local_users[user_id] = database.local_users[user_id]
-    #     # await bot.send_message(user_id,"get_user: Пользователь найден")
-    #     return  local_users[user_id]
-    # except:
-    #     try:
-            with Session() as session:
-                user = session.query(User).filter(User.user_id == user_id).first()
-            # database.local_users[user_id] = user
-            return user
-        # except:
-        #     await bot.send_message(user_id, 'user not found') 
-    # else:
+    with Session() as session:
+        user = session.query(User).filter(User.user_id == user_id).first()
+    return user
+
             
 #  
 async def user_info(user_id):
 
     user = await get_user(user_id)
-    registration_time = user.registration_time.strftime('%Y-%m-%d %H:%M:%S')   # [user_id]
-    bonus_cd_time = user.bonus_cd_time.strftime('%Y-%m-%d %H:%M:%S') # [user_id]
-    user_info = (f"\nuser_id: {user.user_id}\nuser_name: {user.user_name}\nreferral_link:\n{user.referral_link}\nreferrer_id: {user.referrer_id}\nregistration_time:\n{registration_time}" 
+    # registration_time = user.registration_time.strftime('%Y-%m-%d %H:%M:%S')   # [user_id]
+    # bonus_cd_time = user.bonus_cd_time.strftime('%Y-%m-%d %H:%M:%S') # [user_id]
+    user_info = (f"\nuser_id: {user.user_id}\nuser_name: {user.user_name}\nreferral_link:\n{user.referral_link}\nreferrer_id: {user.referrer_id}" 
     + f"\nlevel: {user.level}\nrestate: {user.restate}\ngrow_wallet: {user.grow_wallet}\nliquid_wallet: {user.liquid_wallet}\nturnover: {user.turnover}\nsales: {user.sales}\
-    \nbonuses_available: {user.bonuses_available}\nbonuses_gotten: {user.bonuses_gotten}\nguide_stage: {user.guide_stage}\ncurrent_leader_id: {user.current_leader_id}\nreferrers: {user.referrers}"
-    + f'\nbonus_cd_time:\n{bonus_cd_time}')
+    \nbonuses_gotten: {user.bonuses_gotten}\ncurrent_leader_id: {user.current_leader_id}")
     return user_info
     # except:
     #     await bot.send_message(user_id, "Бот не обновляется♻️\nПерезайдите по реф.ссылке или попробуйте позднее") 
 
 
 async def get_all_users():
-    # try:
     with Session() as session:
         users = session.query(User).all()
         return users
-    # except:
-    #     await bot.send_message(user_id, "не удалось получить список пользователей")
+
+async def get_all_referrals(user_id):
+    with Session() as session:
+        referrals = session.query(Referral).filter(Referral.referrer_id == user_id).all()
+        users = []
+        for referral in referrals:
+            user = await get_user(referral.referral_id)
+            users.append(user)
+        return users
 
 
-level_1_channel = -1002128672686
-level_2_channel = -1002083788701
-level_3_channel = -1002095901143
-level_4_channel = -1002051825111
-level_5_channel = -1002055692741
-level_6_channel = -1002005520032
-level_7_channel = -1002081701051
-level_8_channel = -1002114431064
-level_9_channel = -1002084433490
-level_10_channel = -1002060493521
-level_11_channel = -1002009023699
-level_12_channel = -1002065971215
-level_13_channel = -1002130407802
-level_14_channel = -1002089355929
-level_15_channel = -1001939317640
-level_16_channel = -1002112588451
-level_17_channel = -1002022917818
-level_18_channel = -1002125464843
-level_19_channel = -1002124444687
-level_20_channel = -1002040773959
+async def get_all_referrers(user_id):
+    with Session() as session:
+        referrers = session.query(Referral).filter(Referral.referral_id == user_id).all()
+        users = []
+        for referrer in referrers:
+            user = await get_user(referrer.referrer_id)
+            users.append(user)
+        return users
+
+
+
+level_channels = []
+level_channels.append(-1000000000000) # комментарии в канале или кейсы уровней или 
+level_channels.append(-1002128672686)
+level_channels.append(-1002083788701)
+level_channels.append(-1002095901143)
+level_channels.append(-1002051825111)
+level_channels.append(-1002055692741)
+level_channels.append(-1002005520032)
+level_channels.append(-1002081701051)
+level_channels.append(-1002114431064)
+level_channels.append(-1002084433490)
+level_channels.append(-1002060493521)
+level_channels.append(-1002009023699)
+level_channels.append(-1002065971215)
+level_channels.append(-1002130407802)
+level_channels.append(-1002089355929)
+level_channels.append(-1001939317640)
+level_channels.append(-1002112588451)
+level_channels.append(-1002022917818)
+level_channels.append(-1002125464843)
+level_channels.append(-1002124444687)
+level_channels.append(-1002040773959)
+
+# level_1_channel = -1002128672686
+# level_2_channel = -1002083788701
+# level_3_channel = -1002095901143
+# level_4_channel = -1002051825111
+# level_5_channel = -1002055692741
+# level_6_channel = -1002005520032
+# level_7_channel = -1002081701051
+# level_8_channel = -1002114431064
+# level_9_channel = -1002084433490
+# level_10_channel = -1002060493521
+# level_11_channel = -1002009023699
+# level_12_channel = -1002065971215
+# level_13_channel = -1002130407802
+# level_14_channel = -1002089355929
+# level_15_channel = -1001939317640
+# level_16_channel = -1002112588451
+# level_17_channel = -1002022917818
+# level_18_channel = -1002125464843
+# level_19_channel = -1002124444687
+# level_20_channel = -1002040773959
 # level_1_channel_link = 'https://t.me/+mfZCEAzD49AxNzUy'
 # level_2_channel_link = 'https://t.me/+_OWQU1CpS7xhOGJi'
 # level_3_channel_link = 'https://t.me/+ENbYbjFKxyg1NzUy'

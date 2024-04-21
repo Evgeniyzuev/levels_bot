@@ -59,16 +59,9 @@ async def start_handler( callback_query: types.CallbackQuery, command: CommandOb
     except:
         await bot.send_message(user_id, text='❗️ Не валидная реферальная ссылка ❗️')
         referrer_id = 0
-    # await bot.send_message(user_id, text=f'ВНИМАНИЕ❗️❗️❗️\nБот работает в тестовом режиме\n❗️Никаких выплат не будет до релиза')
- # TRRRRRYYYY DATABASE
-    # TRRRRRYYYY DATABASE
-    referral_link = await create_start_link(bot,str(user_id), encode=True)
-    user = await database.get_or_create_user(user_id, user_name, referral_link, referrer_id)
-    # if user.bonuses_gotten < 2 :
-    #     try:
-    #         await bot.send_message(referrer_id, text= f"По вашей ссылке зашел пользователь:\n{user_name}\nВы получите бонус 🎁 когда пользователь откроет два бонуса.")
-    #     finally:
-    #         pass 
+    user = await database.get_or_create_user(user_id, user_name, referrer_id)
+    await callback_query.answer(f'ваш реферер: {referrer_id}')
+    
     await utils.start_guide_stages(user_id)
 
 
@@ -138,7 +131,7 @@ async def process_open_bonus_button(callback_query: types.CallbackQuery): #messa
                 await bot.send_message(user_id, text="не получилось")   
     await utils.open_bonus(user_id)
     if user.guide_stage == 1:
-        await utils.start_guide2(user_id, callback_query)  
+        await utils.start_guide2(user_id)  
     elif user.guide_stage == 3:
         await utils.start_guide4(user_id)
 
@@ -157,12 +150,23 @@ async def process_get_and_open_bonus(callback_query: types.CallbackQuery):
 async def process_up_level(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
-    current_leader = await database.get_user(user.current_leader_id)
-    if user.level < current_leader.level:
-        await utils.up_level(user_id)
+    try:
+        referrer = await database.get_user(user.referrer_id)
+    except:
+        referrer = None
+    # try:
+    #     current_leader = await database.get_user(user.current_leader_id)
+    # except:
+    #     current_leader = None
+    if referrer and user.level < referrer.level:
+            await utils.up_level(user_id)
     else:
-        await bot.send_message(user_id, text="У вашего Лида нет next level.\n\nВы можете выбрать Лида\nВкладка партнеры\nНаставники доступны:")
-    # await bot.send_message(user_id, 'Лид не найден')
+        try:
+            current_leader = await database.get_user(user.current_leader_id)
+            await bot.send_message(user_id, text=f'\nВаш Лид: {current_leader.user_name}\nуровень: {current_leader.level}\n{current_leader.referral_link}')
+        except:
+            await bot.send_message(user_id, text=f'No current leader')
+             
 
 @dp.callback_query(F.data == "up_me") 
 async def process_up_me(callback_query: types.CallbackQuery):
@@ -263,6 +267,7 @@ async def process_amount_state_ok(message: Message, state: FSMContext) -> None:
     await utils.add_grow(user_id, amount)
     await bot.send_message(user_id, f'Пополнение grow_wallet:\n + {amount} рублей' )
     await bot.send_message(config.levels_guide_id, f'User: {user_id} \nПополнение grow_wallet:\n + {amount} рублей' )
+    await utils.main_menu(config.levels_guide_id)
     # await message.answer("Готово",reply_markup=ReplyKeyboardRemove())
 
 
