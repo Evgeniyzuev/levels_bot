@@ -67,7 +67,7 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
     with Session(expire_on_commit=False) as session:
         user = session.query(User).filter(User.user_id == user_id).first()
         if user:
-            if user.referrer_id != referrer_id:
+            if user.referrer_id != referrer_id and user.user_id != referrer_id:
                 user.referrer_id = referrer_id
                 try:
                     # referral = session.query(Referral).filter(Referral.referrer_id == referrer_id).filter(Referral.referral_id == user_id).first()
@@ -89,8 +89,7 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
             else: level = 0
             user = User(user_id=user_id, user_name=user_name, referral_link=referral_link, referrer_id=referrer_id, registration_time=now, level=level,
                 restate=0, grow_wallet=0, liquid_wallet=0, turnover=0, sales=0, bonuses_available=0, bonuses_gotten=0, guide_stage=0,
-                current_leader_id=referrer_id, referrers='', referrals = '', bonus_cd_time = now 
-                    )
+                current_leader_id=referrer_id, referrers='', referrals = '', bonus_cd_time = now )
             referral = Referral(referrer_id=referrer_id, referral_id=user_id, primary_key=f'{referrer_id}_{user_id}')
             session.add(referral)
             session.add(user)
