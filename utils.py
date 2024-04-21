@@ -341,11 +341,17 @@ async def partners_tub(user_id):
     user_count = 0
     for user in await database.get_all_referrals(user_id):
         user_count += 1
-        referrals_text += (f"\nreferral {user_count}: " + f'{user.user_name}'+ f' lvl: {user.level}' + f' {user.referral_link}')
+        try:
+            referrals_text += (f"\nreferral {user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+        except:
+            referrals_text += "\nрефералы не найдены"
     user_count = 0
     for user in await database.get_all_referrers(user_id):
         user_count += 1
-        referrals_text += (f"\nreferrer {user_count}: " + f'{user.user_name}'+ f' lvl: {user.level}' + f' {user.referral_link}')
+        try:
+             referrals_text += (f"\nreferrer {user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+        except:
+            referrals_text += "\nрефереры не найдены"
     await bot.send_message(user_id, referrals_text, reply_markup=kb.partners_markup)
 
 
