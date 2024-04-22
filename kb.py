@@ -109,7 +109,7 @@ reset_guide_button = InlineKeyboardButton(text="reset guide", callback_data="res
 drop_table_referrals_button = InlineKeyboardButton(text="drop table referrals", callback_data="drop_table_referrals_button", one_time_keyboard = True)
 
 
-admin_panel_buttons_reply_markup = InlineKeyboardMarkup(inline_keyboard=[[all_users_button,], [all_users_level_button,],[reset_guide_button,],[drop_table_referrals_button,]], resize_keyboard=True)
+admin_panel_buttons_reply_markup = InlineKeyboardMarkup(inline_keyboard=[[all_users_button,], [all_users_level_button,],[reset_guide_button,]], resize_keyboard=True)
 
 
 

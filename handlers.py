@@ -101,10 +101,10 @@ async def reset_guide_button(callback_query: types.CallbackQuery):
         session.commit()
     await bot.send_message(user_id, "Guide reseted")
 
-@dp.callback_query(F.data == "drop_table_referrals_button")
-async def drop_table_referrals_button(callback_query: types.CallbackQuery):
-    await database.drop_table_referrals()
-    await bot.send_message(config.levels_guide_id, "Table referrals dropped")
+# @dp.callback_query(F.data == "drop_table_referrals_button")
+# async def drop_table_referrals_button(callback_query: types.CallbackQuery):
+#     await database.drop_table_referrals()
+#     await bot.send_message(config.levels_guide_id, "Table referrals dropped")
 
 
 # # добавление пользователя в канал
