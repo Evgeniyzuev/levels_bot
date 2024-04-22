@@ -60,8 +60,7 @@ async def start_handler( callback_query: types.CallbackQuery, command: CommandOb
         await bot.send_message(user_id, text='❗️ Не валидная реферальная ссылка ❗️')
         referrer_id = 0
     user = await database.get_or_create_user(user_id, user_name, referrer_id)
-    await callback_query.answer(f'ваш реферер: {referrer_id}')
-    
+    # await callback_query.answer(f'ваш реферер: {referrer_id}')
     await utils.start_guide_stages(user_id)
 
 
@@ -101,6 +100,11 @@ async def reset_guide_button(callback_query: types.CallbackQuery):
         user.sales  = 0
         session.commit()
     await bot.send_message(user_id, "Guide reseted")
+
+@dp.callback_query(F.data == "drop_table_referrals_button")
+async def drop_table_referrals_button(callback_query: types.CallbackQuery):
+    await database.drop_table_referrals()
+    await bot.send_message(config.levels_guide_id, "Table referrals dropped")
 
 
 # # добавление пользователя в канал

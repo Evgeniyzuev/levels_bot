@@ -53,9 +53,9 @@ class User(Base):
 
 class Referral(Base):
     __tablename__ = "referals"
-    referrer_id = Column(Integer, ForeignKey("users.user_id"))
-    referral_id = Column(Integer, ForeignKey("users.user_id"))
-    primary_key = Column(String, primary_key=True)
+    referrer_id = Column(Integer,  ForeignKey("users.user_id"), primary_key=True)
+    referral_id = Column(Integer, ForeignKey("users.user_id"), primary_key=True)
+    # primary_key = Column(String, primary_key=True)
 
 Base.metadata.create_all(bind=engine)
 
@@ -71,7 +71,7 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
                 user.referrer_id = referrer_id
                 try:
                     # referral = session.query(Referral).filter(Referral.referrer_id == referrer_id).filter(Referral.referral_id == user_id).first()
-                    referral = Referral(referrer_id=referrer_id, referral_id=user_id, primary_key=f'{referrer_id}_{user_id}')
+                    referral = Referral(referrer_id=referrer_id, referral_id=user_id)
                     session.add(referral)
                     session.commit()
                 except:
@@ -90,7 +90,7 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
             user = User(user_id=user_id, user_name=user_name, referral_link=referral_link, referrer_id=referrer_id, registration_time=now, level=level,
                 restate=0, grow_wallet=0, liquid_wallet=0, turnover=0, sales=0, bonuses_available=0, bonuses_gotten=0, guide_stage=0,
                 current_leader_id=referrer_id, referrers='', referrals = '', bonus_cd_time = now )
-            referral = Referral(referrer_id=referrer_id, referral_id=user_id, primary_key=f'{referrer_id}_{user_id}')
+            referral = Referral(referrer_id=referrer_id, referral_id=user_id)
             session.add(referral)
             session.add(user)
             session.commit()
@@ -122,7 +122,10 @@ async def get_user(user_id):
         user = session.query(User).filter(User.user_id == user_id).first()
     return user
 
-            
+async def drop_table_referrals():
+    with Session() as session:
+        session.execute("DROP TABLE referals")
+        session.commit()
 #  
 async def user_info(user_id):
 

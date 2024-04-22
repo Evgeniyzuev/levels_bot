@@ -230,9 +230,16 @@ async def add_level(user_id):
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
         user.level += 1
-        user.current_leader_id = user.referrer_id
-        # for user in user.referrers:
-        #     await bot.send_message(user.user_id, f'{user.user_name} уровень: {user.level}')
+        if user.current_leader_id != user.referrer_id :
+            await bot.send_message(user.current_leader_id, f'У пользователя{user.user_name} сменился Лид\n{user.user_name} теперь на уровне: {user.level}')
+            user.current_leader_id = user.referrer_id
+        await bot.send_message(user.current_leader_id, f'Ваш партнер, {user.user_name} теперь на уровне: {user.level}') #link to userpage
+
+        for user in await database.get_all_referrals(user_id):
+            try:
+                # referrals_text += (f"\nreferral {user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+                await bot.send_message(user.user_id, f'{user.user_name} теперь на уровне: {user.level}') #link to userpage
+            except: pass
         session.commit()
 
 async def add_sales(user_id):
