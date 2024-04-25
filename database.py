@@ -96,27 +96,6 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
             session.add(referral)
             session.add(user)
             session.commit()
-
-
-        # db.close()
-        # if referrer_id:
-        #     # referrer = await db.query(User).filter(User.id == referrer_id).first()
-        #     referrer = db.query(User).filter(User.user_id == referrer_id).first()
-        #     if referrer:
-        #         user.referrer_id = referrer.user_id
-        #         referrer.subscribers.append(user)
-    # await bot.send_message(user_id, f"Добавлен {user.user_name}\n с балансом {user.restate}")
-    # try: 
-    #     current_leader = await database.get_user(referrer_id)
-    #     # text = (referrer_id +': ' + current_leader.user_name + 'lvl: ' + current_leader.level + '\n')
-    #     # user.referrers += text 
-    # except: 
-    #     text = f'Ваш лид: {referrer_id} не найден в базе'
-    #     await bot.send_message(user_id, text)
-    # database.local_users[user_id] = user
-    # local_user = database.local_users[user_id]
-    # await bot.send_message(user_id, f"Добавлен {user.user_name}\nс балансом {user.restate}")  
-
     return user 
 
 async def get_user(user_id):
@@ -128,9 +107,13 @@ async def drop_table_referrals():
     with Session() as session:
         session.execute("DROP TABLE referals")
         session.commit()
-#  
-async def user_info(user_id):
 
+async def delete_user(user_id):
+    with Session() as session:
+        session.query(User).filter(User.user_id == user_id).delete()
+        session.commit()
+
+async def user_info(user_id):
     user = await get_user(user_id)
     # registration_time = user.registration_time.strftime('%Y-%m-%d %H:%M:%S')   # [user_id]
     # bonus_cd_time = user.bonus_cd_time.strftime('%Y-%m-%d %H:%M:%S') # [user_id]

@@ -99,6 +99,12 @@ async def admin_show_all_users_level():
                 user_count += 1
         except:
             await bot.send_message(config.levels_guide_id, f'GM user {user_count} error')
+
+async def delete_inactive_users():
+    for user in await database.get_all_users():
+        if user.bonuses_gotten == 0:
+            await bot.send_message(config.levels_guide_id, f'User {user.user_id} deleted')
+            await database.delete_user(user.user_id)
     
 async def up_me(user_id):
         user = await database.get_user(user_id)

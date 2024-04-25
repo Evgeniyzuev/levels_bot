@@ -87,6 +87,10 @@ async def all_users_button(callback_query: types.CallbackQuery):
 async def all_users_level_button(callback_query: types.CallbackQuery):
     await utils.admin_show_all_users_level()
 
+@dp.callback_query(F.data == "delete_inactive_users_button")
+async def delete_inactive_users_button(callback_query: types.CallbackQuery):
+    await utils.delete_inactive_users()
+
 @dp.callback_query(F.data == "reset_guide_button")
 async def reset_guide_button(callback_query: types.CallbackQuery):
     user_id = config.levels_guide_id
