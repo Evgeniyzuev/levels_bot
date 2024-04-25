@@ -69,17 +69,16 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
         if user:
                 if user.referrer_id != referrer_id and user.user_id != referrer_id:
                     user.referrer_id = referrer_id
-                    await bot.send_message(user_id, 'Реферал изменился')
+                    await bot.send_message(user_id, 'Реферер изменился')
                 else:
-                    await bot.send_message(user_id, 'Реферал не изменился')
+                    await bot.send_message(user_id, 'Реферер не изменился')
                 try:
                     # referral = session.query(Referral).filter(Referral.referrer_id == referrer_id).filter(Referral.referral_id == user_id).first()
                     referral = Referral(referrer_id=referrer_id, referral_id=user_id)
                     session.add(referral)
-                    session.commit()
                 except:
                     pass
-        session.close()
+        session.commit()
     if not user:
         referral_link = await create_start_link(bot,str(user_id), encode=True)
         await bot.send_message(referrer_id, text= f"По вашей ссылке зашел пользователь:\n{user_name}\nВы получите бонус 🎁 когда пользователь откроет два бонуса.")
