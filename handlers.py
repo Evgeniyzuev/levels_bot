@@ -56,6 +56,7 @@ async def start_handler( callback_query: types.CallbackQuery, command: CommandOb
     try:
         args = command.args
         referrer_id = decode_payload(args)
+        await bot.send_message(user_id, f'referrer_id: {referrer_id}')
     except:
         await bot.send_message(user_id, text='❗️ Не валидная реферальная ссылка ❗️')
         referrer_id = 0
@@ -156,18 +157,21 @@ async def process_up_level(callback_query: types.CallbackQuery):
     user = await database.get_user(user_id)
     try:
         referrer = await database.get_user(user.referrer_id)
+        ref_lvl = referrer.level
     except:
         referrer = None
+        ref_lvl = 0
+        await bot.send_message(user_id, 'Не найден реферал')
     # try:
     #     current_leader = await database.get_user(user.current_leader_id)
     # except:
     #     current_leader = None
-    if referrer and user.level < referrer.level:
+    if ref_lvl > user.level:
             await utils.up_level(user_id)
     else:
         try:
             current_leader = await database.get_user(user.current_leader_id)
-            await bot.send_message(user_id, text=f'\nВаш Лид: {current_leader.user_name}\nуровень: {current_leader.level}\n{current_leader.referral_link}')
+            await bot.send_message(user_id, text=f'У реферала нет следующего уровня\nВаш Лид: {current_leader.user_name}\nуровень: {current_leader.level}\n{current_leader.referral_link}')
         except:
             await bot.send_message(user_id, text=f'No current leader')
              

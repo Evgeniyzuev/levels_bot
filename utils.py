@@ -302,7 +302,7 @@ async def main_menu(user_id):
     #  await bot.send_message(user_id, " Все  вкладки  главного  меню  ", reply_markup=kb.menu_markup)
 
 async def profile_tub(user_id):
-    user_info_text = "Профиль\n\n" + await database.user_info( user_id)
+    user_info_text = await database.user_info( user_id)
     await bot.send_message(user_id, user_info_text, disable_web_page_preview=True)
 
 async def level_tub(user_id):

@@ -67,8 +67,11 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
     with Session(expire_on_commit=False) as session:
         user = session.query(User).filter(User.user_id == user_id).first()
         if user:
-            if user.referrer_id != referrer_id and user.user_id != referrer_id:
-                user.referrer_id = referrer_id
+                if user.referrer_id != referrer_id and user.user_id != referrer_id:
+                    user.referrer_id = referrer_id
+                    await bot.send_message(user_id, 'Реферал изменился')
+                else:
+                    await bot.send_message(user_id, 'Реферал не изменился')
                 try:
                     # referral = session.query(Referral).filter(Referral.referrer_id == referrer_id).filter(Referral.referral_id == user_id).first()
                     referral = Referral(referrer_id=referrer_id, referral_id=user_id)
@@ -132,9 +135,7 @@ async def user_info(user_id):
     user = await get_user(user_id)
     # registration_time = user.registration_time.strftime('%Y-%m-%d %H:%M:%S')   # [user_id]
     # bonus_cd_time = user.bonus_cd_time.strftime('%Y-%m-%d %H:%M:%S') # [user_id]
-    user_info = (f"\nuser_id: {user.user_id}\nuser_name: {user.user_name}\nreferral_link:\n{user.referral_link}\nreferrer_id: {user.referrer_id}" 
-    + f"\nlevel: {user.level}\nrestate: {user.restate}\ngrow_wallet: {user.grow_wallet}\nliquid_wallet: {user.liquid_wallet}\nturnover: {user.turnover}\nsales: {user.sales}\
-    \nbonuses_gotten: {user.bonuses_gotten}\ncurrent_leader_id: {user.current_leader_id}")
+    user_info = (f"\n{user.user_name}\nУровень: {user.level}\n{user.referral_link}\nОборот: {user.turnover}\nПродажи: {user.sales}\nБонусов получено: {user.bonuses_gotten}\nID: {user.user_id}\nЛид: {user.current_leader_id}\nРеферер: {user.referrer_id}")
     return user_info
     # except:
     #     await bot.send_message(user_id, "Бот не обновляется♻️\nПерезайдите по реф.ссылке или попробуйте позднее") 
