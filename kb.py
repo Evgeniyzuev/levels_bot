@@ -19,12 +19,11 @@ show_requisites = InlineKeyboardButton(text="💳 ПО СБП", callback_data="s
 show_requisites2 = InlineKeyboardButton(text="💎 Toncoin", callback_data="show_requisites2", one_time_keyboard = True)
 show_requisites3 = InlineKeyboardButton(text="💵 USDT TON", callback_data="show_requisites3", one_time_keyboard = True)
 
-grow_to_liquid = InlineKeyboardButton(text="🌱🔻💧", callback_data="grow_to_liquid", one_time_keyboard = True)
-liquid_wallet_down = InlineKeyboardButton(text="💧🔻🔻", callback_data="liquid_wallet_down", one_time_keyboard = True)
-grow_wallet_up = InlineKeyboardButton(text="🔼🔼🌱", callback_data="grow_wallet_up", one_time_keyboard = True)
-liquid_to_grow = InlineKeyboardButton(text="💧🔼🌱", callback_data="liquid_to_grow", one_time_keyboard = True)
-restate_up = InlineKeyboardButton(text="🌱🔼🏡", callback_data="restate_up", one_time_keyboard = True)
-restate_down = InlineKeyboardButton(text="🏡🔻🌱", callback_data="restate_down", one_time_keyboard = True)
+grow_wallet_down = InlineKeyboardButton(text="💳 🔻", callback_data="grow_wallet_down", one_time_keyboard = True)
+grow_wallet_up = InlineKeyboardButton(text="💳 🔼", callback_data="grow_wallet_up", one_time_keyboard = True)
+
+restate_up = InlineKeyboardButton(text="💳 ➡️ 💎", callback_data="restate_up", one_time_keyboard = True)
+restate_down = InlineKeyboardButton(text="💎 ➡️ 💳", callback_data="restate_down", one_time_keyboard = True)
 admin_confirm_payment = InlineKeyboardButton(text="Деньги вижу", callback_data="admin_confirm_payment", one_time_keyboard = True)
 admin_payout = InlineKeyboardButton(text="Перевод", callback_data="admin_payout", one_time_keyboard = True)
 check_user_payment = InlineKeyboardButton(text="Проверить платеж", callback_data="check_user_payment", one_time_keyboard = True)
@@ -44,7 +43,7 @@ partners_buttons = []
 learn_buttons = []
 bonus_buttons = [bonus_button, profile_button,]
 
-balance_control_buttons = [[restate_up, grow_wallet_up, liquid_to_grow], [restate_down, grow_to_liquid, liquid_wallet_down]]
+balance_control_buttons = [[restate_up, grow_wallet_up], [restate_down, grow_wallet_down]]
 # balance_control_buttons2 = [restate_down, liquid_to_grow, liquid_wallet_down]
 
 

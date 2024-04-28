@@ -67,8 +67,10 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
     with Session(expire_on_commit=False) as session:
         user = session.query(User).filter(User.user_id == user_id).first()
         if user:
-                if user.referrer_id != referrer_id and user.user_id != referrer_id:
+                await bot.send_message(user_id, f'user.referrer_id: {user.referrer_id} referrer_id: {referrer_id}')
+                if int(user.referrer_id) != int(referrer_id) and int(user.user_id) != int(referrer_id):
                     user.referrer_id = referrer_id
+                    session.commit()
                     await bot.send_message(user_id, 'Реферер изменился')
                 else:
                     await bot.send_message(user_id, 'Реферер не изменился')
@@ -76,9 +78,8 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
                     # referral = session.query(Referral).filter(Referral.referrer_id == referrer_id).filter(Referral.referral_id == user_id).first()
                     referral = Referral(referrer_id=referrer_id, referral_id=user_id)
                     session.add(referral)
-                except:
-                    pass
-        session.commit()
+                    session.commit()
+                except: pass
     if not user:
         referral_link = await create_start_link(bot,str(user_id), encode=True)
         await bot.send_message(referrer_id, text= f"По вашей ссылке зашел пользователь:\n{user_name}\nВы получите бонус 🎁 когда пользователь откроет два бонуса.")
@@ -111,6 +112,8 @@ async def drop_table_referrals():
 async def delete_user(user_id):
     with Session() as session:
         session.query(User).filter(User.user_id == user_id).delete()
+        session.query(Referral).filter(Referral.referral_id == user_id).delete()
+        session.query(Referral).filter(Referral.referrer_id == user_id).delete()
         session.commit()
 
 async def user_info(user_id):

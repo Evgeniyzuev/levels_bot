@@ -33,15 +33,13 @@ class Form(StatesGroup):
     amount_state = State()
     amount_state_ok = State()
     wait_check = State()
-    grow_to_liquid = State()
-    liquid_wallet_down = State()
     grow_wallet_up = State()
-    liquid_to_grow = State()
     restate_up = State()
     restate_down = State()
     admin_send_ckeck_state = State()
     user_send_ckeck_state = State()
     requisites_entering_state = State()
+    grow_wallet_down = State()
 
 
 
@@ -100,7 +98,6 @@ async def reset_guide_button(callback_query: types.CallbackQuery):
         user.bonuses_gotten  = 0
         user.restate  = 0
         user.grow_wallet  = 0
-        user.liquid_wallet  = 0
         user.turnover  = 0
         user.sales  = 0
         session.commit()
@@ -292,15 +289,42 @@ async def process_amount_state_ok(callback_query: types.CallbackQuery, state: FS
 
 
 #движения по счетам  --------------------------------> кнопки
-@dp.callback_query(F.data == "grow_to_liquid")
-async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+# @dp.callback_query(F.data == "grow_wallet_down")
+# async def process_grow_wallet_down(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+#     user_id = callback_query.from_user.id
+#     user = await database.get_user(user_id)
+#     await state.set_state(Form.grow_wallet_down)
+#     # await utils.up_liquid(user_id)
+#     await bot.send_message(user_id, f'\nGrow -> Liquid\nКомиссия за срочность 1%\nДоступно Grow: {user.grow_wallet} \nВведите сумму:')
+
+# @dp.message(StateFilter(Form.grow_wallet_down))
+# async def process_amount(message: Message, state: FSMContext) -> None:
+#     user_id = message.from_user.id
+#     user = await database.get_user(user_id)
+#     await state.update_data(amount=message.text)
+#     try:
+#         amount = int(message.text)
+#         if amount < 0: amount = -1*amount
+#         if user.grow_wallet < int(amount):
+#             await message.answer(f'Недостаточно средств')
+#         else:
+#             await utils.add_grow(user_id, (-1)*int(amount))
+#             await utils.add_liquid(user_id, (0.99)*int(amount))
+#             await message.answer(f'\nGrow -> Liquid:\n{amount} рублей')
+#     except:
+#         await message.answer('Введите целое число')
+#     await state.set_state(None)
+
+
+@dp.callback_query(F.data == "grow_wallet_down")
+async def process_grow_wallet_down(callback_query: types.CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
-    await state.set_state(Form.grow_to_liquid)
+    await state.set_state(Form.grow_wallet_down)
     # await utils.up_liquid(user_id)
-    await bot.send_message(user_id, f'\nGrow -> Liquid\nКомиссия за срочность 1%\nДоступно Grow: {user.grow_wallet} \nВведите сумму:')
+    await bot.send_message(user_id, f'Доступно: {user.grow_wallet} рублей\nВведите сумму:')
 
-@dp.message(StateFilter(Form.grow_to_liquid))
+@dp.message(StateFilter(Form.grow_wallet_down))
 async def process_amount(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     user = await database.get_user(user_id)
@@ -308,34 +332,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     try:
         amount = int(message.text)
         if amount < 0: amount = -1*amount
-        if user.grow_wallet < int(amount):
-            await message.answer(f'Недостаточно средств')
-        else:
-            await utils.add_grow(user_id, (-1)*int(amount))
-            await utils.add_liquid(user_id, (0.99)*int(amount))
-            await message.answer(f'\nGrow -> Liquid:\n{amount} рублей')
-    except:
-        await message.answer('Введите целое число')
-    await state.set_state(None)
-
-
-@dp.callback_query(F.data == "liquid_wallet_down")
-async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
-    user_id = callback_query.from_user.id
-    user = await database.get_user(user_id)
-    await state.set_state(Form.liquid_wallet_down)
-    # await utils.up_liquid(user_id)
-    await bot.send_message(user_id, f'Доступно Liquid: {user.liquid_wallet} рублей\nВведите сумму:')
-
-@dp.message(StateFilter(Form.liquid_wallet_down))
-async def process_amount(message: Message, state: FSMContext) -> None:
-    user_id = message.from_user.id
-    user = await database.get_user(user_id)
-    await state.update_data(amount=message.text)
-    try:
-        amount = int(message.text)
-        if amount < 0: amount = -1*amount
-        if user.liquid_wallet < amount or user.liquid_wallet <= 0:
+        if user.grow_wallet < amount:
             await message.answer(f'Недостаточно средств')
             await state.set_state(None)
         elif amount < 100:
@@ -354,7 +351,6 @@ async def process_amount(message: Message, state: FSMContext) -> None:
 @dp.message(StateFilter(Form.requisites_entering_state))
 async def process_requisites_entering_state(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
-    user = await database.get_user(user_id)
     await state.update_data(requisites=message.text)
     try:
         requisites = (message.text)
@@ -362,7 +358,6 @@ async def process_requisites_entering_state(message: Message, state: FSMContext)
         await bot.send_message(config.levels_guide_id, text= f"Отправить перевод USER (amount;ID)")
         await bot.send_message(config.levels_guide_id, text= f"{database.payout[user_id]};{user_id}", reply_markup=kb.admin_payout)
         await bot.send_message(user_id, f'Перевод: {database.payout[user_id]} рублей в процессе')
-        # await message.answer(f'Вывод из liquid_wallet:\n - {database.payout[user_id]} рублей')
     except:
         await message.answer('Введите валидные реквизиты')
     await state.set_state(None)
@@ -376,7 +371,7 @@ async def process_confirm_payment_button(callback_query: types.CallbackQuery, st
     user_id = int(user_id)
     database.payment_to_check_user_id = user_id
     amount = int(amount)
-    await utils.add_liquid(user_id,(-1)*amount)
+    await utils.add_grow(user_id,(-1)*amount)
     await bot.send_message(config.levels_guide_id, text= f"прикрепляем чек USER (amount;ID)")
     await bot.edit_message_reply_markup(config.levels_guide_id, message_id=callback_query.message.message_id, reply_markup=None )
     await bot.send_message(user_id, f'Перевод исполнен:\n {amount} рублей' )
@@ -389,11 +384,10 @@ async def process_admin_send_ckeck_state(message: Message, state: FSMContext) ->
 
 
 @dp.callback_query(F.data == "grow_wallet_up")
-async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+async def process_wallet_up(callback_query: types.CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.grow_wallet_up)
-    # await utils.up_liquid(user_id)
     await bot.send_message(user_id, f'Grow: {user.grow_wallet} \nПополнить счёт. Введите сумму:\n(целое число не менее 100 рублей)')
 
 @dp.message(StateFilter(Form.grow_wallet_up))
@@ -410,39 +404,38 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     await message.answer(f'Пополнить grow_wallet:\n + {amount} рублей', reply_markup=kb.show_requisites_markup)
 
 
-@dp.callback_query(F.data == "liquid_to_grow")
-async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
-    user_id = callback_query.from_user.id
-    user = await database.get_user(user_id)
-    await state.set_state(Form.liquid_to_grow)
-    # await utils.up_liquid(user_id)
-    await bot.send_message(user_id, f'\nLiquid -> Grow\nДоступно Liquid: {user.liquid_wallet} \nВведите сумму:')
+# @dp.callback_query(F.data == "liquid_to_grow")
+# async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+#     user_id = callback_query.from_user.id
+#     user = await database.get_user(user_id)
+#     await state.set_state(Form.liquid_to_grow)
+#     # await utils.up_liquid(user_id)
+#     await bot.send_message(user_id, f'\nLiquid -> Grow\nДоступно Liquid: {user.liquid_wallet} \nВведите сумму:')
 
-@dp.message(StateFilter(Form.liquid_to_grow))
-async def process_amount(message: Message, state: FSMContext) -> None:
-    user_id = message.from_user.id
-    user = await database.get_user(user_id)
-    await state.update_data(amount=message.text)
-    try:
-        amount = int(message.text)
-        if amount < 0: amount = -1*amount
-        if user.liquid_wallet < int(amount):
-            await message.answer(f'Недостаточно средств')
-        else:
-            await utils.add_liquid(user_id, (-1)*int(amount))
-            await utils.add_grow(user_id, int(amount))
-            await message.answer(f'\nLiquid -> Grow:\n{amount} рублей')
-    except:
-        await message.answer('Введите целое число')
-    await state.set_state(None)
+# @dp.message(StateFilter(Form.liquid_to_grow))
+# async def process_amount(message: Message, state: FSMContext) -> None:
+#     user_id = message.from_user.id
+#     user = await database.get_user(user_id)
+#     await state.update_data(amount=message.text)
+#     try:
+#         amount = int(message.text)
+#         if amount < 0: amount = -1*amount
+#         if user.liquid_wallet < int(amount):
+#             await message.answer(f'Недостаточно средств')
+#         else:
+#             await utils.add_liquid(user_id, (-1)*int(amount))
+#             await utils.add_grow(user_id, int(amount))
+#             await message.answer(f'\nLiquid -> Grow:\n{amount} рублей')
+#     except:
+#         await message.answer('Введите целое число')
+#     await state.set_state(None)
     
 
 @dp.callback_query(F.data == "restate_up")
-async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+async def process_grow_to_restate(callback_query: types.CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.restate_up)
-    # await utils.up_liquid(user_id)
     await bot.send_message(user_id, f'\nGrow -> Restate\n\nДоступно Grow: ' + '%.0f' %(user.grow_wallet) + ' рублей\nВведите сумму:') 
 
 @dp.message(StateFilter(Form.restate_up))
@@ -465,7 +458,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     
     
 @dp.callback_query(F.data == "restate_down")
-async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+async def process_restate_to_grow(callback_query: types.CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     if user.level < 1:

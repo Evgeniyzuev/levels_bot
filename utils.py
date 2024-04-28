@@ -31,20 +31,16 @@ async def up_level(user_id):
     next_level = (user.level)+1
     restate_require =  math.ceil(250 * database.basecoin) * (2 ** (next_level))
     lead_grace =  math.ceil(250 * database.basecoin) * (2 ** (next_level))
-    balance = user.restate + user.grow_wallet + user.liquid_wallet
-    # delta = (lead_grace + restate_require) - balance
-    # database.gamma[user_id] = lead_grace - (user.grow_wallet+user.liquid_wallet)
+    balance = user.restate + user.grow_wallet
     if (restate_require-user.restate) > 0:
-        database.gamma[user_id] = lead_grace-(user.grow_wallet + user.liquid_wallet-(restate_require-user.restate)) 
+        database.gamma[user_id] = lead_grace-(user.grow_wallet -(restate_require-user.restate)) 
     else:  
-         database.gamma[user_id] = lead_grace-(user.grow_wallet + user.liquid_wallet)
+         database.gamma[user_id] = lead_grace-(user.grow_wallet)
 
     if database.gamma[user_id] > 0:
         database.gamma[user_id] = database.gamma[user_id]/100
         xxx = database.gamma[user_id]
-        # await bot.send_message(user_id, f'xxx:{xxx} math.ceil: {math.ceil(xxx)}')
         database.gamma[user_id] = math.ceil(xxx)
-        # await bot.send_message(user_id, f'math.ceil: {database.gamma[user_id]}')
         database.gamma[user_id] = database.gamma[user_id]*100
 
         await bot.send_message(user_id, f'Следующий уровень: {next_level}\n\nRestate требуется: {restate_require} руб\nБлагодарность Рефереру: {lead_grace} руб\
@@ -84,10 +80,15 @@ async def good_morning(user_id):
 
 async def admin_show_all_users():
     user_count = 0
+    users_text = ''
     for user in await database.get_all_users():
         user_count += 1
-        user_info_text = f"User {user_count}: " + await database.user_info( user.user_id)
-        await bot.send_message(config.levels_guide_id, user_info_text, disable_web_page_preview=True)
+        user_id_text = str(user.user_id)
+        user_name_text = user.user_name
+
+        users_text += '\n<a href="tg://openmessage?user_id='+user_id_text+'">'+user_name_text+'</a>'#<a href="tg://user?id=123456789">inline mention of a user</a>'   tg://openmessage?user_id=
+        # user_info_text = f"User {user_count}: " + await database.user_info( user.user_id)
+    await bot.send_message(config.levels_guide_id, f'users: {user_count}' + users_text, disable_web_page_preview=True)
 
 async def admin_show_all_users_level():
     user_count = 1
@@ -102,8 +103,7 @@ async def admin_show_all_users_level():
 
 async def delete_inactive_users():
     for user in await database.get_all_users():
-        if user.bonuses_gotten == 0:
-            await bot.send_message(config.levels_guide_id, f'User {user.user_id} deleted')
+        if user.turnover == 0:
             await database.delete_user(user.user_id)
     
 async def up_me(user_id):
@@ -113,35 +113,23 @@ async def up_me(user_id):
         restate_require =(250 * database.basecoin) * (2 ** (user.level+1))
         lead_grace = (250 * database.basecoin) * (2 ** (user.level+1)) 
         if (restate_require-user.restate) > 0:
-          database.gamma[user_id] = lead_grace-(user.grow_wallet + user.liquid_wallet-(restate_require-user.restate)) 
+          database.gamma[user_id] = lead_grace-(user.grow_wallet -(restate_require-user.restate)) 
         else:  
-            database.gamma[user_id] = lead_grace-(user.grow_wallet + user.liquid_wallet)
+            database.gamma[user_id] = lead_grace-(user.grow_wallet )
         if database.gamma[user_id] > 0:
             await bot.send_message(user_id,  f'Недостаточно средств: {database.gamma[user_id]} рублей')
         else:
-            balance = current_leader.restate + current_leader.grow_wallet + current_leader.liquid_wallet+lead_grace
+            balance = current_leader.restate + current_leader.grow_wallet +lead_grace
             balance_text = f'\n\nБаланс: '+ '%.0f' %(balance) +  'рублей'
             if restate_require > user.restate:
-                # user.grow_wallet-=(restate_require-user.restate)
                 await add_grow(user_id, -restate_require+user.restate)
-                # user.restate=restate_require
                 await add_restate(user_id, restate_require-user.restate)
-            # user.grow_wallet-=lead_grace 
             await add_grow(user_id, -lead_grace)
-            # user.turnover+=lead_grace
             await add_turnover(user_id, lead_grace)               
-            # user.level += 1
             await add_level(user_id)
             await add_sales(referrer_id)
-            # current_leader.grow_wallet+=lead_grace
             await add_grow(referrer_id, lead_grace)
-            # current_leader.turnover+=lead_grace
             await add_turnover(referrer_id, lead_grace)
-            await if_grow_wallet_is_negative(user_id)
-                    
-            # balance = current_leader.restate + current_leader.grow_wallet + current_leader.liquid_wallet
-            # text0 = await get_balance(current_leader_id)
-
             await bot.send_message(user_id, f'Поздравляем! Уровень повышен 🔼\n\nВаш уровень: {user.level+1}\n\nСсылки: {database.level_links[user.level]}')
             await bot.send_message(current_leader.user_id, f'Продажа: +{lead_grace} рублей'+ balance_text +f'\n\nВаш реферал {user.user_name}: {(user.level)} 🔼 {user.level+1}\
                                 \n\n*напоминание: рефералы, достигшие уровня Лида, могут уйти к другому Лиду. Для того, чтобы взять следующий уровень')
@@ -190,7 +178,7 @@ async def open_bonus(user_id):
 
             session.commit()
             bonuses_gotten = user.bonuses_gotten
-            balance_sum = user.restate+user.grow_wallet+user.liquid_wallet
+            balance_sum = user.restate+user.grow_wallet
 
             text1 = '\n🔼 Получено бонусов:     ' + f"{bonuses_gotten}"
             text2 = f"\n🎁 Бонус:         " + '%.2f' %(bonus_size) + " рублей" 
@@ -217,12 +205,6 @@ async def add_grow(user_id, amount):
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
         user.grow_wallet += amount
-        session.commit()
-
-async def add_liquid(user_id, amount):
-    with database.Session() as session:
-        user = session.query(User).filter(User.user_id == user_id).first()
-        user.liquid_wallet += amount
         session.commit()
 
 async def add_turnover(user_id, amount):
@@ -254,15 +236,6 @@ async def add_sales(user_id):
         user.sales += 1
         session.commit()
 
-async def if_grow_wallet_is_negative(user_id):
-    with database.Session() as session:
-        user = session.query(User).filter(User.user_id == user_id).first()
-        if user.grow_wallet < 0:
-            # user.liquid_wallet+=user.grow_wallet
-            await add_liquid(user_id, user.grow_wallet)
-            # user.grow_wallet=0
-            await add_grow(user_id, -user.grow_wallet)
-
 
 # START Guide Stages
 async def start_guide_stages(user_id):
@@ -290,7 +263,7 @@ async def get_balance(user_id):
     #      await bot.send_message(user_id, "Пользователь не найден. Перезагрузите бота")
     # else:     
         user = await database.get_user(user_id)
-        sum = user.restate + user.grow_wallet + user.liquid_wallet
+        sum = user.restate + user.grow_wallet
         balance_text = "\n💳 Баланс:            " + ( '%.2f' %(sum)) + " рублей"
         return balance_text
         
@@ -332,15 +305,11 @@ async def settings_tub(user_id):
 
 async def balance_tub(user_id):
     user = await database.get_user(user_id)
-
-
-    text1 = "\n\n🏡 Restate(25%):  " + '%.2f' %(user.restate) + ' рублей'
-    text2 =   "\n🌱 Grow(20%):      " + '%.2f' %(user.grow_wallet) + ' рублей'
-    text3 =   "\n💧 Liquid(0%):       " + '%.2f' %(user.liquid_wallet) + ' рублей'
-
-    sum = user.restate + user.grow_wallet + user.liquid_wallet
-    text0 = "💳 Баланс:            " + ( '%.2f' %(sum)) + " рублей"
-    balance_text = text0 + text1 + text2 + text3 + texts.accounts_about_text
+    text1 = "\n\n💎 Стек:            " + '%.2f' %(user.restate) + ' рублей'
+    text2 =   "\n💳 Кошелек:    " + '%.2f' %(user.grow_wallet) + ' рублей'
+    sum = user.restate + user.grow_wallet
+    text0 = "Баланс:            " + ( '%.2f' %(sum)) + " рублей"
+    balance_text = text0 + text1 + text2 + texts.accounts_about_text
 
 
     try:
