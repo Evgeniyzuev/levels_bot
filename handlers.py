@@ -49,16 +49,15 @@ class Form(StatesGroup):
 async def start_handler( callback_query: types.CallbackQuery, command: CommandObject): #message: Message,
     user_name = callback_query.from_user.full_name
     user_id = callback_query.from_user.id
-    # await callback_query.message.delete()
-    # await bot.send_message(user_id, f"{user_name}, привет! Рад видеть! 🤗")
+    user_link = callback_query.from_user.username
     try:
         args = command.args
         referrer_id = decode_payload(args)
-        await bot.send_message(user_id, f'referrer_id: {referrer_id}')
+        # await bot.send_message(user_id, f'referrer_id: {referrer_id}')
     except:
         await bot.send_message(user_id, text='❗️ Не валидная реферальная ссылка ❗️')
         referrer_id = 0
-    user = await database.get_or_create_user(user_id, user_name, referrer_id)
+    user = await database.get_or_create_user(user_id, user_name, user_link, referrer_id)
     # await callback_query.answer(f'ваш реферер: {referrer_id}')
     await utils.start_guide_stages(user_id)
 
@@ -103,6 +102,10 @@ async def reset_guide_button(callback_query: types.CallbackQuery):
         session.commit()
     await bot.send_message(user_id, "Guide reseted")
 
+@dp.callback_query(F.data == "alter_table_user_button")
+async def alter_table_user_button(callback_query: types.CallbackQuery):
+    await database.alter_table_user()
+    await bot.send_message(config.levels_guide_id, "alter table user")
 # @dp.callback_query(F.data == "drop_table_referrals_button")
 # async def drop_table_referrals_button(callback_query: types.CallbackQuery):
 #     await database.drop_table_referrals()
@@ -322,7 +325,7 @@ async def process_grow_wallet_down(callback_query: types.CallbackQuery, state: F
     user = await database.get_user(user_id)
     await state.set_state(Form.grow_wallet_down)
     # await utils.up_liquid(user_id)
-    await bot.send_message(user_id, f'Доступно: {user.grow_wallet} рублей\nВведите сумму:')
+    await bot.send_message(user_id, f'\nВывод с кошелька\nДоступно: {user.grow_wallet} рублей\nВведите сумму:')
 
 @dp.message(StateFilter(Form.grow_wallet_down))
 async def process_amount(message: Message, state: FSMContext) -> None:
@@ -388,7 +391,7 @@ async def process_wallet_up(callback_query: types.CallbackQuery, state: FSMConte
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.grow_wallet_up)
-    await bot.send_message(user_id, f'Grow: {user.grow_wallet} \nПополнить счёт. Введите сумму:\n(целое число не менее 100 рублей)')
+    await bot.send_message(user_id, f'Счёт: {user.grow_wallet} \nПополнить Счёт. Введите сумму:\n(целое число не менее 100 рублей)')
 
 @dp.message(StateFilter(Form.grow_wallet_up))
 async def process_amount(message: Message, state: FSMContext) -> None:
@@ -436,7 +439,7 @@ async def process_grow_to_restate(callback_query: types.CallbackQuery, state: FS
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.restate_up)
-    await bot.send_message(user_id, f'\nGrow -> Restate\n\nДоступно Grow: ' + '%.0f' %(user.grow_wallet) + ' рублей\nВведите сумму:') 
+    await bot.send_message(user_id, f'\nСчёт -> Стек\n\nДоступно Счёт: ' + '%.0f' %(user.grow_wallet) + ' рублей\nВведите сумму:') 
 
 @dp.message(StateFilter(Form.restate_up))
 async def process_amount(message: Message, state: FSMContext) -> None:
@@ -451,7 +454,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
         else:
             await utils.add_grow(user_id, int(-1*amount))
             await utils.add_restate(user_id, int(amount))
-            await message.answer(f'Пополнение restate:\n + {amount} рублей')
+            await message.answer(f'Пополнение стека:\n + {amount} рублей')
     except:
         await message.answer('Введите целое число')
     await state.set_state(None)
@@ -466,7 +469,7 @@ async def process_restate_to_grow(callback_query: types.CallbackQuery, state: FS
     else:
         await state.set_state(Form.restate_down)
         restate_require =(250 * database.basecoin) * (2 ** (user.level))
-        await bot.send_message(user_id, f'Restate -> Grow\nКоммиссия 10%\nДоступно: {user.restate-restate_require} рублей\nВведите сумму:')
+        await bot.send_message(user_id, f'Стек -> Счёт\nКоммиссия 10%\nДоступно: {user.restate-restate_require} рублей\nВведите сумму:')
 
 @dp.message(StateFilter(Form.restate_down))
 async def process_amount(message: Message, state: FSMContext) -> None:

@@ -34,6 +34,7 @@ class User(Base):
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True, index=True)
     user_name = Column(String, index=True)
+    user_link = Column(String)
     referral_link = Column(String, unique=True)
     referrer_id = Column(Integer, ForeignKey("users.user_id"))
     registration_time = Column(DateTime)
@@ -62,24 +63,26 @@ Base.metadata.create_all(bind=engine)
 # db = SQLAlchemy(app)
 # database.db = database.SessionLocal()
 
-async def get_or_create_user(user_id, user_name, referrer_id):   # user = await db.query(User).filter(User.id == user_id).first()
+async def get_or_create_user(user_id, user_name, user_link, referrer_id):   # user = await db.query(User).filter(User.id == user_id).first()
 
     with Session(expire_on_commit=False) as session:
         user = session.query(User).filter(User.user_id == user_id).first()
         if user:
-                await bot.send_message(user_id, f'user.referrer_id: {user.referrer_id} referrer_id: {referrer_id}')
+                # await bot.send_message(user_id, f'user.referrer_id: {user.referrer_id} referrer_id: {referrer_id}')
                 if int(user.referrer_id) != int(referrer_id) and int(user.user_id) != int(referrer_id):
                     user.referrer_id = referrer_id
                     session.commit()
-                    await bot.send_message(user_id, 'Реферер изменился')
-                else:
-                    await bot.send_message(user_id, 'Реферер не изменился')
+                    # await bot.send_message(user_id, 'Реферер изменился')
+                # else:
+                #     await bot.send_message(user_id, 'Реферер не изменился')
                 try:
                     # referral = session.query(Referral).filter(Referral.referrer_id == referrer_id).filter(Referral.referral_id == user_id).first()
                     referral = Referral(referrer_id=referrer_id, referral_id=user_id)
                     session.add(referral)
                     session.commit()
                 except: pass
+        user_info_text = await database.user_info( referrer_id)
+        await bot.send_message(user_id, 'Реферер: ' + user_info_text, disable_web_page_preview=True)
     if not user:
         referral_link = await create_start_link(bot,str(user_id), encode=True)
         await bot.send_message(referrer_id, text= f"По вашей ссылке зашел пользователь:\n{user_name}\nВы получите бонус 🎁 когда пользователь откроет два бонуса.")
@@ -90,7 +93,7 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
             # referrers_text += f'{referrer_id}'
             if user_id == 6251757715: level = 100
             else: level = 0
-            user = User(user_id=user_id, user_name=user_name, referral_link=referral_link, referrer_id=referrer_id, registration_time=now, level=level,
+            user = User(user_id=user_id, user_name=user_name, user_link=user_link, referral_link=referral_link, referrer_id=referrer_id, registration_time=now, level=level,
                 restate=0, grow_wallet=0, liquid_wallet=0, turnover=0, sales=0, bonuses_available=0, bonuses_gotten=0, guide_stage=0,
                 current_leader_id=referrer_id, referrers='', referrals = '', bonus_cd_time = now )
             referral = Referral(referrer_id=referrer_id, referral_id=user_id)
@@ -98,6 +101,11 @@ async def get_or_create_user(user_id, user_name, referrer_id):   # user = await 
             session.add(user)
             session.commit()
     return user 
+
+async def alter_table_user():
+    with Session() as session:
+        session.execute("ALTER TABLE users ADD COLUMN user_link TEXT")
+        session.commit()
 
 async def get_user(user_id):
     with Session() as session:
@@ -112,15 +120,23 @@ async def drop_table_referrals():
 async def delete_user(user_id):
     with Session() as session:
         session.query(User).filter(User.user_id == user_id).delete()
-        session.query(Referral).filter(Referral.referral_id == user_id).delete()
-        session.query(Referral).filter(Referral.referrer_id == user_id).delete()
         session.commit()
+    
+async def delete_all_refs(user_id):
+    with Session() as session:
+        session.query(Referral).filter(Referral.referrer_id == user_id).delete()
+        session.query(Referral).filter(Referral.referral_id == user_id).delete()
+
+async def get_all_refs():
+    with Session() as session:
+        refs = session.query(Referral).all()
+        return refs
 
 async def user_info(user_id):
     user = await get_user(user_id)
     # registration_time = user.registration_time.strftime('%Y-%m-%d %H:%M:%S')   # [user_id]
     # bonus_cd_time = user.bonus_cd_time.strftime('%Y-%m-%d %H:%M:%S') # [user_id]
-    user_info = (f"\n{user.user_name}\nУровень: {user.level}\n{user.referral_link}\nОборот: {user.turnover}\nПродажи: {user.sales}\nБонусов получено: {user.bonuses_gotten}\nID: {user.user_id}\nЛид: {user.current_leader_id}\nРеферер: {user.referrer_id}")
+    user_info = (f"\n{user.user_name}\nУровень: {user.level}\n@{user.user_link}\n{user.referral_link}\nОборот: {user.turnover}\nБонусов получено: {user.bonuses_gotten}\nID: {user.user_id}\nЛид: {user.current_leader_id}\nРеферер: {user.referrer_id}")
     return user_info
     # except:
     #     await bot.send_message(user_id, "Бот не обновляется♻️\nПерезайдите по реф.ссылке или попробуйте позднее") 

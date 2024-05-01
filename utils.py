@@ -43,10 +43,10 @@ async def up_level(user_id):
         database.gamma[user_id] = math.ceil(xxx)
         database.gamma[user_id] = database.gamma[user_id]*100
 
-        await bot.send_message(user_id, f'Следующий уровень: {next_level}\n\nRestate требуется: {restate_require} руб\nБлагодарность Рефереру: {lead_grace} руб\
+        await bot.send_message(user_id, f'Следующий уровень: {next_level}\n\nСтек требуется: {restate_require} руб\nЦена: {lead_grace} руб\
                                \n\nБаланс: '+ '%.2f' %(balance) + " руб"+ f'\n\nПополните баланс на {database.gamma[user_id]} руб', reply_markup=kb.show_requisites_markup)
     else:
-        await bot.send_message(user_id, f'Следующий уровень: {next_level}\n\nRestate требуется: {restate_require} руб\nБлагодарность Рефереру: {lead_grace} руб\
+        await bot.send_message(user_id, f'Следующий уровень: {next_level}\n\nСтек требуется: {restate_require} руб\nЦена: {lead_grace} руб\
                                \n\nБаланс: '+ '%.2f' %(balance) + " руб", reply_markup=kb.up_me)
 
 
@@ -69,12 +69,12 @@ async def good_morning(user_id):
     user = await database.get_user(user_id)
     restate = user.restate
     grow = user.grow_wallet
-    add_restate_amount = restate * 0.0006
+    add_restate_amount = restate * 0.00061
     add_grow_amount = grow * 0.0005
     await add_grow(user_id, add_grow_amount)
     await add_restate(user_id, add_restate_amount)
     await add_turnover(user_id, add_grow_amount+add_restate_amount)
-    text = f'\n+ {add_grow_amount + add_restate_amount} рублей\n\nдоброе утро, {user.user_name} 😄\n\nВ Уровнях мы получаем деньги каждый день\n\nКакая сумма будет комфортна?'
+    text = f'\n+ {add_grow_amount + add_restate_amount} руб\n\nдоброе утро, {user.user_name} 😄\n\nВ Уровнях мы получаем деньги каждый день\n\nКакая сумма будет комфортна?'
     await bot.send_message(user_id, text)
 
 
@@ -105,7 +105,11 @@ async def delete_inactive_users():
     for user in await database.get_all_users():
         if user.turnover == 0:
             await database.delete_user(user.user_id)
-    
+            await database.delete_all_refs(user.user_id)
+        else: pass
+        
+                
+
 async def up_me(user_id):
         user = await database.get_user(user_id)
         referrer_id = user.referrer_id
@@ -117,10 +121,10 @@ async def up_me(user_id):
         else:  
             database.gamma[user_id] = lead_grace-(user.grow_wallet )
         if database.gamma[user_id] > 0:
-            await bot.send_message(user_id,  f'Недостаточно средств: {database.gamma[user_id]} рублей')
+            await bot.send_message(user_id,  f'Недостаточно средств: {database.gamma[user_id]} руб')
         else:
             balance = current_leader.restate + current_leader.grow_wallet +lead_grace
-            balance_text = f'\n\nБаланс: '+ '%.0f' %(balance) +  'рублей'
+            balance_text = f'\n\nБаланс: '+ '%.0f' %(balance) +  'руб'
             if restate_require > user.restate:
                 await add_grow(user_id, -restate_require+user.restate)
                 await add_restate(user_id, restate_require-user.restate)
@@ -131,7 +135,7 @@ async def up_me(user_id):
             await add_grow(referrer_id, lead_grace)
             await add_turnover(referrer_id, lead_grace)
             await bot.send_message(user_id, f'Поздравляем! Уровень повышен 🔼\n\nВаш уровень: {user.level+1}\n\nСсылки: {database.level_links[user.level]}')
-            await bot.send_message(current_leader.user_id, f'Продажа: +{lead_grace} рублей'+ balance_text +f'\n\nВаш реферал {user.user_name}: {(user.level)} 🔼 {user.level+1}\
+            await bot.send_message(current_leader.user_id, f'Продажа: +{lead_grace} руб'+ balance_text +f'\n\nВаш реферал {user.user_name}: {(user.level)} 🔼 {user.level+1}\
                                 \n\n*напоминание: рефералы, достигшие уровня Лида, могут уйти к другому Лиду. Для того, чтобы взять следующий уровень')
 
 
@@ -181,8 +185,8 @@ async def open_bonus(user_id):
             balance_sum = user.restate+user.grow_wallet
 
             text1 = '\n🔼 Получено бонусов:     ' + f"{bonuses_gotten}"
-            text2 = f"\n🎁 Бонус:         " + '%.2f' %(bonus_size) + " рублей" 
-            text3 = "\n💳 Баланс:      " + ( '%.2f' %(balance_sum)) + " рублей"
+            text2 = f"\n🎁 Бонус:         " + '%.2f' %(bonus_size) + " руб" 
+            text3 = "\n💳 Баланс:      " + ( '%.2f' %(balance_sum)) + " руб"
             try:
                 await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'], caption=text1 + text2 + text3)
             except:
@@ -264,7 +268,7 @@ async def get_balance(user_id):
     # else:     
         user = await database.get_user(user_id)
         sum = user.restate + user.grow_wallet
-        balance_text = "\n💳 Баланс:            " + ( '%.2f' %(sum)) + " рублей"
+        balance_text = "\n💳 Баланс:            " + ( '%.2f' %(sum)) + " руб"
         return balance_text
         
       
@@ -305,11 +309,12 @@ async def settings_tub(user_id):
 
 async def balance_tub(user_id):
     user = await database.get_user(user_id)
-    text1 = "\n\n💎 Стек:            " + '%.2f' %(user.restate) + ' рублей'
-    text2 =   "\n💳 Кошелек:    " + '%.2f' %(user.grow_wallet) + ' рублей'
+    text1 =   "\n💎 Стек:    " + '%.2f' %(user.restate) + ' руб'
+    text2 =   "\n💳 Счёт:    " + '%.2f' %(user.grow_wallet) + ' руб'
     sum = user.restate + user.grow_wallet
-    text0 = "Баланс:            " + ( '%.2f' %(sum)) + " рублей"
-    balance_text = text0 + text1 + text2 + texts.accounts_about_text
+    text0 =   "Баланс:        " + ( '%.2f' %(sum)) + " руб"
+    text3 = f"\n\nДоход в день\n💎(25%): {user.restate * 0.00061}\n💳(20%): {user.grow_wallet * 0.0005} "
+    balance_text = text0 + text1 + text2 + text3
 
 
     try:
@@ -319,22 +324,23 @@ async def balance_tub(user_id):
 
 async def partners_tub(user_id):
     # user = await database.get_user(user_id)
-    referrals_text = "Партнеры:\n"
+    referrals_text = "Рефералы:\n"
     user_count = 0
     for user in await database.get_all_referrals(user_id):
-        user_count += 1
         try:
-            referrals_text += (f"\nreferral {user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+            referrals_text += (f"\n{user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+            user_count += 1
         except:
-            referrals_text += "\nрефералы не найдены"
+            pass
     user_count = 0
-    for user in await database.get_all_referrers(user_id):
-        user_count += 1
+    referrals_text += "\n\nРефереры:\n"
+    for user in await database.get_all_referrers(user_id):        
         try:
              referrals_text += (f"\nreferrer {user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+             user_count += 1
         except:
-            referrals_text += "\nрефереры не найдены"
-    await bot.send_message(user_id, referrals_text, reply_markup=kb.partners_markup)
+            pass
+    await bot.send_message(user_id, referrals_text, disable_web_page_preview=True, reply_markup=kb.partners_markup)
 
 
     # leader_id = user.current_leader_id
@@ -418,7 +424,7 @@ async def start_guide1(user_id):
 async def start_guide2(user_id):
     bonus_bottom_text = '%.2f' %(10*database.basecoin)
     bonus_top_text = '%.2f' %(50*database.basecoin)
-    await bot.send_message(user_id, f'\nСейчас бонусы от {bonus_bottom_text} до {bonus_top_text} рублей.'+texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
+    await bot.send_message(user_id, f'\nСейчас бонусы от {bonus_bottom_text} до {bonus_top_text} руб.'+texts.start_guide2_text, reply_markup=kb.subscribe_buttons)
 
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
