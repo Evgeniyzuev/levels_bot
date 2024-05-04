@@ -69,12 +69,14 @@ async def good_morning(user_id):
     user = await database.get_user(user_id)
     restate = user.restate
     grow = user.grow_wallet
-    add_restate_amount = restate * 0.00061
+    add_restate_amount = restate * 0.00062
     add_grow_amount = grow * 0.0005
-    await add_grow(user_id, add_grow_amount)
-    await add_restate(user_id, add_restate_amount)
-    await add_turnover(user_id, add_grow_amount+add_restate_amount)
-    text = f'\n+ {add_grow_amount + add_restate_amount} руб\n\nдоброе утро, {user.user_name} 😄\n\nВ Уровнях мы получаем деньги каждый день\n\nКакая сумма будет комфортна?'
+    sum = add_grow_amount+add_restate_amount
+    balance_text = await get_balance(user_id)
+    await add_grow(user_id, sum)
+    # await add_restate(user_id, add_restate_amount)
+    await add_turnover(user_id, sum)
+    text = f'\n+ {sum} руб'+balance_text+f'\n\nДоброе утро, {user.user_name} 😄\n\nГарантированный ежедневный доход\nКакая сумма будет комфортна?'
     await bot.send_message(user_id, text)
 
 
@@ -268,7 +270,7 @@ async def get_balance(user_id):
     # else:     
         user = await database.get_user(user_id)
         sum = user.restate + user.grow_wallet
-        balance_text = "\n💳 Баланс:            " + ( '%.2f' %(sum)) + " руб"
+        balance_text = "\n💳 Баланс:       " + ( '%.2f' %(sum)) + " руб"
         return balance_text
         
       
@@ -309,11 +311,11 @@ async def settings_tub(user_id):
 
 async def balance_tub(user_id):
     user = await database.get_user(user_id)
-    text1 =   "\n💎 Стек:    " + '%.2f' %(user.restate) + ' руб'
+    text1 =   "\n💎 Стек:     " + '%.2f' %(user.restate) + ' руб'
     text2 =   "\n💳 Счёт:    " + '%.2f' %(user.grow_wallet) + ' руб'
     sum = user.restate + user.grow_wallet
-    text0 =   "Баланс:        " + ( '%.2f' %(sum)) + " руб"
-    text3 = f"\n\nДоход в день\n💎(25%): {user.restate * 0.00061}\n💳(20%): {user.grow_wallet * 0.0005} "
+    text0 =   "Баланс:     " + ( '%.2f' %(sum)) + " руб"
+    text3 = f"\n\nДоход в день\n💎(25%): {user.restate * 0.00062}\n💳(20%): {user.grow_wallet * 0.0005}\nПополнение и вывод от 100 рублей"
     balance_text = text0 + text1 + text2 + text3
 
 
@@ -341,24 +343,7 @@ async def partners_tub(user_id):
         except:
             pass
     await bot.send_message(user_id, referrals_text, disable_web_page_preview=True, reply_markup=kb.partners_markup)
-
-
-    # leader_id = user.current_leader_id
-    
-    # try:
-    #     referrer = await database.get_user(user.referrer_id)
-    #     referrer_name = referrer.user_name
-    # except:
-    #     referrer_name = 'Не найден'
-    # try:
-    #     current_leader = await database.get_user(leader_id)
-    #     leader_name = current_leader.user_name
-    #     leader_level=current_leader.level
-    #     leader_referral_link = current_leader.referral_link
-    #     await bot.send_message(user_id, "💎 Партнеры" +f'\n\nРеферер: {referrer_name}\nЛид: {leader_name}\nLevel: {leader_level}\n{leader_referral_link} ' , reply_markup=kb.partners_markup)
-    # except:
-    #     await bot.send_message(user_id, "💎 Партнеры" +f'\n\nРеферер: {referrer_name}\nВаш Лид не найден' , reply_markup=kb.partners_markup)
-        
+      
 async def resources_tub(user_id):
     await bot.send_message(user_id, texts.resurses_text)
 

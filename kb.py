@@ -103,13 +103,14 @@ button8 = KeyboardButton(text="📚\nОбучение")
 menu_buttons_reply_markup = ReplyKeyboardMarkup(keyboard=[[button1, button2, button3, button4], [button5, button6, button7, button8]], resize_keyboard=True)
 
 all_users_button = InlineKeyboardButton(text="all users", callback_data="all_users_button", one_time_keyboard = True)
-alter_table_user_button = InlineKeyboardButton(text="alter table user", callback_data="alter_table_user_button", one_time_keyboard = True)
+good_morning_button = InlineKeyboardButton(text="good morning", callback_data="good_morning_button", one_time_keyboard = True)
+# alter_table_user_button = InlineKeyboardButton(text="alter table user", callback_data="alter_table_user_button", one_time_keyboard = True)
 # all_users_level_button = InlineKeyboardButton(text="all users level", callback_data="all_users_level_button", one_time_keyboard = True)
 reset_guide_button = InlineKeyboardButton(text="reset guide", callback_data="reset_guide_button", one_time_keyboard = True)
-drop_table_referrals_button = InlineKeyboardButton(text="drop table referrals", callback_data="drop_table_referrals_button", one_time_keyboard = True)
+# drop_table_referrals_button = InlineKeyboardButton(text="drop table referrals", callback_data="drop_table_referrals_button", one_time_keyboard = True)
 delete_inactive_users_button = InlineKeyboardButton(text="delete inactive users", callback_data="delete_inactive_users_button", one_time_keyboard = True)
 
-admin_panel_buttons_reply_markup = InlineKeyboardMarkup(inline_keyboard=[[all_users_button,], [alter_table_user_button],[reset_guide_button,],[delete_inactive_users_button,]], resize_keyboard=True)
+admin_panel_buttons_reply_markup = InlineKeyboardMarkup(inline_keyboard=[[all_users_button,], [good_morning_button],[reset_guide_button,],[delete_inactive_users_button,]], resize_keyboard=True)
 
 
 

@@ -88,6 +88,10 @@ async def all_users_level_button(callback_query: types.CallbackQuery):
 async def delete_inactive_users_button(callback_query: types.CallbackQuery):
     await utils.delete_inactive_users()
 
+@dp.callback_query(F.data == "good_morning_button")
+async def good_morning_button(callback_query: types.CallbackQuery):
+    await utils.good_morning(config.levels_guide_id)
+
 @dp.callback_query(F.data == "reset_guide_button")
 async def reset_guide_button(callback_query: types.CallbackQuery):
     user_id = config.levels_guide_id
@@ -175,7 +179,7 @@ async def process_up_level(callback_query: types.CallbackQuery):
     else:
         try:
             current_leader = await database.get_user(user.current_leader_id)
-            await bot.send_message(user_id, text=f'У реферала нет следующего уровня\nВаш Лид: {current_leader.user_name}\nуровень: {current_leader.level}\n{current_leader.referral_link}')
+            await bot.send_message(user_id, text=f'У реферера нет следующего уровня\nВаш Лид: {current_leader.user_name}\nуровень: {current_leader.level}\n{current_leader.referral_link}')
         except:
             await bot.send_message(user_id, text=f'No current leader')
              

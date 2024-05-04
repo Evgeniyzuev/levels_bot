@@ -136,7 +136,7 @@ async def user_info(user_id):
     user = await get_user(user_id)
     # registration_time = user.registration_time.strftime('%Y-%m-%d %H:%M:%S')   # [user_id]
     # bonus_cd_time = user.bonus_cd_time.strftime('%Y-%m-%d %H:%M:%S') # [user_id]
-    user_info = (f"\n{user.user_name}\nУровень: {user.level}\n@{user.user_link}\n{user.referral_link}\nОборот: {user.turnover}\nБонусов получено: {user.bonuses_gotten}\nID: {user.user_id}\nЛид: {user.current_leader_id}\nРеферер: {user.referrer_id}")
+    user_info = (f"{user.user_name}\nУровень: {user.level}\n@{user.user_link}\n{user.referral_link}\nОборот: {user.turnover}\nБонусов получено: {user.bonuses_gotten}\nID: {user.user_id}\nЛид: {user.current_leader_id}\nРеферер: {user.referrer_id}")
     return user_info
     # except:
     #     await bot.send_message(user_id, "Бот не обновляется♻️\nПерезайдите по реф.ссылке или попробуйте позднее") 
