@@ -152,7 +152,7 @@ async def approve_chat_join_request(chat_join: ChatJoinRequest):
         if user.level >= database.level_channels.index(chat_id):
             await bot.send_message(chat_join.from_user.id, f'{user_name}, добро пожаловать в канал {chat_name}')
             await chat_join.approve()
-        else: await bot.send_message(chat_join.from_user.id, f'Недостаточный уровнень для доступа в канал {chat_id}')
+        else: await bot.send_message(chat_join.from_user.id, f'Недостаточный уровнень для доступа в канал {chat_name}')
 
 
 
@@ -224,15 +224,16 @@ async def add_level(user_id):
     with database.Session() as session:
         user = session.query(User).filter(User.user_id == user_id).first()
         user.level += 1
+        text = f'\n{user.user_name} теперь на уровне: {user.level}'
         if user.current_leader_id != user.referrer_id :
-            await bot.send_message(user.current_leader_id, f'У пользователя{user.user_name} сменился Лид\n{user.user_name} теперь на уровне: {user.level}')
+            await bot.send_message(user.current_leader_id, f'У пользователя{user.user_name} сменился Лид'+ text)
             user.current_leader_id = user.referrer_id
-        await bot.send_message(user.current_leader_id, f'Ваш партнер, {user.user_name} теперь на уровне: {user.level}') #link to userpage
+        await bot.send_message(user.current_leader_id, f'Ваш партнер повысил уровень {user.user_name}'+ text) #link to userpage
 
         for user in await database.get_all_referrals(user_id):
             try:
                 # referrals_text += (f"\nreferral {user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
-                await bot.send_message(user.user_id, f'{user.user_name} теперь на уровне: {user.level}') #link to userpage
+                await bot.send_message(user.user_id, text) #link to userpage
             except: pass
         session.commit()
 
@@ -311,11 +312,13 @@ async def settings_tub(user_id):
 
 async def balance_tub(user_id):
     user = await database.get_user(user_id)
-    text1 =   "\n💎 Стек:     " + '%.2f' %(user.restate) + ' руб'
-    text2 =   "\n💳 Счёт:    " + '%.2f' %(user.grow_wallet) + ' руб'
+    text1 =   "\n💎Стек:    " + '%.2f' %(user.restate)
+    text2 =   "\n💳Счёт:    " + '%.2f' %(user.grow_wallet)
     sum = user.restate + user.grow_wallet
-    text0 =   "Баланс:     " + ( '%.2f' %(sum)) + " руб"
-    text3 = f"\n\nДоход в день\n💎(25%): {user.restate * 0.00062}\n💳(20%): {user.grow_wallet * 0.0005}\nПополнение и вывод от 100 рублей"
+    restate_income = user.restate * 0.00062
+    grow_wallet_income = user.grow_wallet * 0.0005
+    text0 =   "Баланс:    " + ( '%.2f' %(sum)) + " руб"
+    text3 = f"\n\nДоход в день руб:\n💎(25%): {restate_income}\n💳(20%): {grow_wallet_income}"
     balance_text = text0 + text1 + text2 + text3
 
 

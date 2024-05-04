@@ -329,7 +329,7 @@ async def process_grow_wallet_down(callback_query: types.CallbackQuery, state: F
     user = await database.get_user(user_id)
     await state.set_state(Form.grow_wallet_down)
     # await utils.up_liquid(user_id)
-    await bot.send_message(user_id, f'\nВывод с кошелька\nДоступно: {user.grow_wallet} рублей\nВведите сумму:')
+    await bot.send_message(user_id, f'💳Счёт: {user.grow_wallet}\nВывод от 100 руб\nНапишите сумму:')
 
 @dp.message(StateFilter(Form.grow_wallet_down))
 async def process_amount(message: Message, state: FSMContext) -> None:
@@ -395,7 +395,7 @@ async def process_wallet_up(callback_query: types.CallbackQuery, state: FSMConte
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.grow_wallet_up)
-    await bot.send_message(user_id, f'Счёт: {user.grow_wallet} \nПополнить Счёт. Введите сумму:\n(целое число не менее 100 рублей)')
+    await bot.send_message(user_id, f'💳Счёт: {user.grow_wallet} \nПополнение от 100 руб\nНапишите сумму:')
 
 @dp.message(StateFilter(Form.grow_wallet_up))
 async def process_amount(message: Message, state: FSMContext) -> None:
@@ -443,7 +443,7 @@ async def process_grow_to_restate(callback_query: types.CallbackQuery, state: FS
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.restate_up)
-    await bot.send_message(user_id, f'\nСчёт -> Стек\n\nДоступно Счёт: ' + '%.0f' %(user.grow_wallet) + ' рублей\nВведите сумму:') 
+    await bot.send_message(user_id, f'\n💳Счёт -> 💎Стек\n\nДоступно 💳Счёт: ' + '%.2f' %(user.grow_wallet) + ' рублей\nВведите сумму:') 
 
 @dp.message(StateFilter(Form.restate_up))
 async def process_amount(message: Message, state: FSMContext) -> None:
@@ -458,7 +458,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
         else:
             await utils.add_grow(user_id, int(-1*amount))
             await utils.add_restate(user_id, int(amount))
-            await message.answer(f'Пополнение стека:\n + {amount} рублей')
+            await message.answer(f'Пополненить 💎Стек:\n + {amount} рублей')
     except:
         await message.answer('Введите целое число')
     await state.set_state(None)
@@ -469,11 +469,11 @@ async def process_restate_to_grow(callback_query: types.CallbackQuery, state: FS
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     if user.level < 1:
-        await bot.send_message(user_id, 'продажа недвижимости доступна с уровня 1')
+        await bot.send_message(user_id, 'Продажа 💎Стека доступна с уровня 1')
     else:
         await state.set_state(Form.restate_down)
         restate_require =(250 * database.basecoin) * (2 ** (user.level))
-        await bot.send_message(user_id, f'Стек -> Счёт\nКоммиссия 10%\nДоступно: {user.restate-restate_require} рублей\nВведите сумму:')
+        await bot.send_message(user_id, f'💎Стек -> 💳Счёт\nКоммиссия 10%\nДоступно:'+ '%.2f' % (user.restate-restate_require) + ' рублей\nВведите сумму:')
 
 @dp.message(StateFilter(Form.restate_down))
 async def process_amount(message: Message, state: FSMContext) -> None:
@@ -481,13 +481,13 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     user = await database.get_user(user_id)
     await state.update_data(amount=message.text)
     restate_require =(250 * database.basecoin) * (2 ** (user.level))
-    await bot.send_message(user_id, f'Требование уровня по недвижимости: {restate_require} рублей\nНедвижимость ниже требования \
-                            приведет к заморозке уровня и дохода\nЗаморозка доступна с уровня 5\nДоступно к продаже: {user.restate - restate_require} рублей\n')
+    text = f'Требование уровня по недвижимости: {restate_require} рублей\nНедвижимость ниже требования \
+                            приведет к заморозке уровня и дохода\nЗаморозка доступна с уровня 5\nДоступно к продаже: {user.restate - restate_require} рублей\n'
     try:
         amount = int(message.text)
         if amount < 0: amount = -1*amount
         if (user.restate - restate_require) < int(message.text):
-            await message.answer(f'Недостаточно средств')
+            await message.answer(text)
         else:
             await utils.add_restate(user_id, (-1)*int(amount))
             await utils.add_grow(user_id, (0.9)*int(amount))
