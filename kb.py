@@ -21,7 +21,7 @@ show_requisites3 = InlineKeyboardButton(text="💵 USDT TON", callback_data="sho
 
 grow_wallet_down = InlineKeyboardButton(text="💳 🔻", callback_data="grow_wallet_down", one_time_keyboard = True)
 grow_wallet_up = InlineKeyboardButton(text="💳 🔼", callback_data="grow_wallet_up", one_time_keyboard = True)
-
+transfer_button = InlineKeyboardButton(text="💳 Перевод", callback_data="transfer", one_time_keyboard = True)
 restate_up = InlineKeyboardButton(text="💳 ➡️ 💎", callback_data="restate_up", one_time_keyboard = True)
 restate_down = InlineKeyboardButton(text="💎 ➡️ 💳", callback_data="restate_down", one_time_keyboard = True)
 admin_confirm_payment = InlineKeyboardButton(text="Деньги вижу", callback_data="admin_confirm_payment", one_time_keyboard = True)
@@ -43,7 +43,7 @@ partners_buttons = []
 learn_buttons = []
 bonus_buttons = [bonus_button, profile_button,]
 
-balance_control_buttons = [[restate_up, grow_wallet_up], [restate_down, grow_wallet_down]]
+balance_control_buttons = [[restate_up, transfer_button, grow_wallet_up], [restate_down, grow_wallet_down]]
 # balance_control_buttons2 = [restate_down, liquid_to_grow, liquid_wallet_down]
 
 

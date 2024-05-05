@@ -40,6 +40,9 @@ class Form(StatesGroup):
     user_send_ckeck_state = State()
     requisites_entering_state = State()
     grow_wallet_down = State()
+    transfer_to_id = State()
+    transfer_sum = State()
+    process_transfer_approvement = State()
 
 
 
@@ -410,33 +413,101 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     database.gamma[user_id] = amount
     await message.answer(f'Пополнить grow_wallet:\n + {amount} рублей', reply_markup=kb.show_requisites_markup)
 
+@dp.callback_query(F.data == "transfer")
+async def process_transfer(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+    user_id = callback_query.from_user.id
+    user = await database.get_user(user_id)
+    await state.set_state(Form.transfer_to_id)
+    await bot.send_message(user_id, f'💳Счёт: {user.grow_wallet} \nПеревод пользователю\nНапишите id пользователя:')
 
-# @dp.callback_query(F.data == "liquid_to_grow")
-# async def process_grow_to_liquid(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+@dp.message(StateFilter(Form.transfer_to_id))
+async def process_amount(message: Message, state: FSMContext) -> None:
+    user_id = message.from_user.id
+    await state.update_data(user_to_id=message.text)
+    try:
+        user_to_id = int(message.text)
+        transfer_user = await database.get_user(user_to_id)
+        await bot.send_message(user_id, f'Перевод пользователю: {transfer_user.user_name}\nНапишите сумму:')
+        await state.set_state(Form.transfer_sum)
+    except:
+        await message.answer('Пользователь не найден')
+        await state.set_state(None)
+    transfer = database.Transfer()
+    transfer.user_to_id = user_to_id
+    database.transfers[user_id] = transfer
+    
+@dp.message(StateFilter(Form.transfer_sum))
+async def process_amount(message: Message, state: FSMContext) -> None:
+    user_id = message.from_user.id
+    
+    await state.update_data(amount=message.text)
+    try:
+        amount = float(message.text)
+    except:
+        await message.answer('Некорректная сумма')
+        await state.set_state(None)
+    if amount < 0: amount = -1*amount
+    user = await database.get_user(user_id)
+    if amount > user.grow_wallet:
+        await message.answer(f'Недостаточно средств')
+        await state.set_state(None)
+    else:
+        transfer = database.transfers[user_id]
+        transfer.amount = amount
+        database.transfers[user_id] = transfer
+        user_recipient = await database.get_user(transfer.user_to_id)
+        # reply_markup = InlineKeyboardMarkup().add(InlineKeyboardButton(text="Перевести", callback_data="transfer_approve"))#.add(InlineKeyboardButton(text="Отменить", callback_data="transfer_cancel"))
+        transfer_approvement_markup = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Перевести", callback_data="transfer_approve")],[InlineKeyboardButton(text="Отменить", callback_data="transfer_cancel")]], resize_keyboard=True)
+        await bot.send_message(user_id, f'Перевод пользователю: {user_recipient.user_name}\nСумма: {amount} рублей', reply_markup=transfer_approvement_markup)
+        await state.set_state(Form.process_transfer_approvement)
+
+@dp.callback_query(StateFilter(Form.process_transfer_approvement))
+async def process_transfer_approve(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+    if callback_query.data == "transfer_cancel":
+        user_id = callback_query.from_user.id
+        database.transfers[user_id] = None
+        await bot.send_message(user_id, f'Отменено')
+        await state.set_state(None)
+
+    if callback_query.data == "transfer_approve":
+        user_id = callback_query.from_user.id
+        user = await database.get_user(user_id)
+        transfer = database.transfers[user_id]
+        user_recipient = await database.get_user(transfer.user_to_id)
+        
+        if transfer.amount <= user.grow_wallet:
+            await utils.add_grow(user_id, -transfer.amount)
+            await utils.add_grow(transfer.user_to_id, transfer.amount)
+            balance_text = await utils.get_balance(user_id)
+            balance_recipient_text = await utils.get_balance(transfer.user_to_id)
+            await bot.send_message(user_id, f'Переведено: {user_recipient.user_name}\nСумма: {transfer.amount} рублей' + balance_text)
+            await bot.send_message(transfer.user_to_id, f'Перевод от: {user.user_name}\nID: {user.user_id}\nСумма: {transfer.amount} рублей' + balance_recipient_text)
+        else:
+            await bot.send_message(user_id, f'Недостаточно средств')
+        database.transfers[user_id] = None
+        await state.set_state(None)
+
+
+
+# @dp.callback_query(F.data == "transfer_approve")
+# async def process_transfer_approve(callback_query: types.CallbackQuery, state: FSMContext) -> None:
 #     user_id = callback_query.from_user.id
 #     user = await database.get_user(user_id)
-#     await state.set_state(Form.liquid_to_grow)
-#     # await utils.up_liquid(user_id)
-#     await bot.send_message(user_id, f'\nLiquid -> Grow\nДоступно Liquid: {user.liquid_wallet} \nВведите сумму:')
-
-# @dp.message(StateFilter(Form.liquid_to_grow))
-# async def process_amount(message: Message, state: FSMContext) -> None:
-#     user_id = message.from_user.id
-#     user = await database.get_user(user_id)
-#     await state.update_data(amount=message.text)
-#     try:
-#         amount = int(message.text)
-#         if amount < 0: amount = -1*amount
-#         if user.liquid_wallet < int(amount):
-#             await message.answer(f'Недостаточно средств')
-#         else:
-#             await utils.add_liquid(user_id, (-1)*int(amount))
-#             await utils.add_grow(user_id, int(amount))
-#             await message.answer(f'\nLiquid -> Grow:\n{amount} рублей')
-#     except:
-#         await message.answer('Введите целое число')
+#     transfer = database.transfers[user_id]
+#     if transfer.amount <= user.grow_wallet:
+#         await utils.add_grow(user_id, -transfer.amount)
+#         await utils.add_grow(transfer.user_to_id, transfer.amount)
+#         await bot.send_message(user_id, f'Переведено пользователю: {transfer.user_to_id}\nСумма: {transfer.amount} рублей')
+#     else:
+#         await bot.send_message(user_id, f'Недостаточно средств')
 #     await state.set_state(None)
-    
+
+# @dp.callback_query(F.data == "transfer_cancel")
+# async def process_transfer_cancel(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+#     user_id = callback_query.from_user.id
+#     database.transfers[user_id] = None
+#     await bot.send_message(user_id, f'Отменено')
+#     await state.set_state(None)
 
 @dp.callback_query(F.data == "restate_up")
 async def process_grow_to_restate(callback_query: types.CallbackQuery, state: FSMContext) -> None:

@@ -72,10 +72,10 @@ async def good_morning(user_id):
     add_restate_amount = restate * 0.00062
     add_grow_amount = grow * 0.0005
     sum = add_grow_amount+add_restate_amount
-    balance_text = await get_balance(user_id)
     await add_grow(user_id, sum)
     # await add_restate(user_id, add_restate_amount)
     await add_turnover(user_id, sum)
+    balance_text = await get_balance(user_id)
     text = f'\n+ {sum} руб'+balance_text+f'\n\nДоброе утро, {user.user_name} 😄\n\nГарантированный ежедневный доход\nКакая сумма будет комфортна?'
     await bot.send_message(user_id, text)
 
@@ -320,8 +320,6 @@ async def balance_tub(user_id):
     text0 =   "Баланс:    " + ( '%.2f' %(sum)) + " руб"
     text3 = f"\n\nДоход в день руб:\n💎(25%): {restate_income}\n💳(20%): {grow_wallet_income}"
     balance_text = text0 + text1 + text2 + text3
-
-
     try:
         await bot.send_photo(user_id, photo=config.photo_ids_test['restate_grow_liquid'], caption=f'{balance_text}', reply_markup=kb.balance_control_markup)
     except:
@@ -330,18 +328,18 @@ async def balance_tub(user_id):
 async def partners_tub(user_id):
     # user = await database.get_user(user_id)
     referrals_text = "Рефералы:\n"
-    user_count = 0
+    user_count = 1
     for user in await database.get_all_referrals(user_id):
         try:
             referrals_text += (f"\n{user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
             user_count += 1
         except:
             pass
-    user_count = 0
+    user_count = 1
     referrals_text += "\n\nРефереры:\n"
     for user in await database.get_all_referrers(user_id):        
         try:
-             referrals_text += (f"\nreferrer {user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+             referrals_text += (f"\n{user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
              user_count += 1
         except:
             pass

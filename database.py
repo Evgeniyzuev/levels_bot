@@ -262,6 +262,7 @@ basecoin = 1
 usdt_rub = 93
 ton_rub = 600
 gamma = {}
+transfers = {}
 payment_to_check = {}
 
 payout = {}
@@ -270,3 +271,6 @@ payment_to_check_amount = 0
 # users = {}
 
 
+class Transfer:
+    user_to_id = 0
+    amount = 0
