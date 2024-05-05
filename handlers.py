@@ -580,7 +580,7 @@ async def photo_handler(message: Message):
 @dp.callback_query(F.data == "check_subscribe_button")
 async def check_subs(callback_query: types.CallbackQuery):
         user_id = callback_query.from_user.id
-        user_channel_status = await bot.get_chat_member(chat_id='-1001973511610', user_id=user_id)
+        user_channel_status = await bot.get_chat_member(chat_id=config.levels_channel_id, user_id=user_id)
         if user_channel_status != 'left' and user_channel_status.status in ['creator', 'member', 'ChatMemberMember']:
                await callback_query.message.delete()
                await utils.start_guide3(user_id)   

@@ -81,7 +81,10 @@ async def get_or_create_user(user_id, user_name, user_link, referrer_id):   # us
                     session.add(referral)
                     session.commit()
                 except: pass
-        user_info_text = await database.user_info( referrer_id)
+        try:
+            user_info_text = await database.user_info( referrer_id)
+        except:
+            user_info_text = 'Пользователь не найден'
         await bot.send_message(user_id, 'Реферер: ' + user_info_text, disable_web_page_preview=True)
     if not user:
         referral_link = await create_start_link(bot,str(user_id), encode=True)
