@@ -97,7 +97,7 @@ button4 = KeyboardButton(text="⚙️\nНастрой")
 button5 = KeyboardButton(text="💎\nПартнеры")
 button6 = KeyboardButton(text="🔗\nРесурсы")
 button7 = KeyboardButton(text="🎁\nБонусы")
-button8 = KeyboardButton(text="📚\nОбучение")
+button8 = KeyboardButton(text="❓\nПроДоход")
 
 
 menu_buttons_reply_markup = ReplyKeyboardMarkup(keyboard=[[button1, button2, button3, button4], [button5, button6, button7, button8]], resize_keyboard=True)

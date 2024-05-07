@@ -10,6 +10,7 @@ import kb
 from misc import bot
 from database import User
 
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 
 from aiogram.types import ChatJoinRequest
 
@@ -308,7 +309,8 @@ async def level_tub(user_id):
         await bot.send_message(user_id, f"\nВаш уровень: {level}", reply_markup=kb.level_markup)
 
 async def settings_tub(user_id):
-     await bot.send_message(user_id, f"\nНастройки")
+    settings_markup= InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Уведомления", callback_data="notifications")],[InlineKeyboardButton(text="Профиль", callback_data="other_partners")]],resize_keyboard=True,)
+    await bot.send_message(user_id, f"\nНастройки", reply_markup=settings_markup)
 
 async def balance_tub(user_id):
     user = await database.get_user(user_id)
@@ -326,24 +328,15 @@ async def balance_tub(user_id):
         await bot.send_message(user_id, f'{balance_text}', reply_markup=kb.balance_control_markup)
 
 async def partners_tub(user_id):
-    # user = await database.get_user(user_id)
-    referrals_text = "Рефералы:\n"
-    user_count = 1
-    for user in await database.get_all_referrals(user_id):
-        try:
-            referrals_text += (f"\n{user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
-            user_count += 1
-        except:
-            pass
-    user_count = 1
-    referrals_text += "\n\nРефереры:\n"
-    for user in await database.get_all_referrers(user_id):        
-        try:
-             referrals_text += (f"\n{user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
-             user_count += 1
-        except:
-            pass
-    await bot.send_message(user_id, referrals_text, disable_web_page_preview=True, reply_markup=kb.partners_markup)
+    user = await database.get_user(user_id)
+    referrer_id = user.referrer_id
+    partners_markup= InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Рефералы", callback_data="referrals")],[InlineKeyboardButton(text="Партнеры", callback_data="other_partners")]],resize_keyboard=True,)
+    try:
+        user_info_text = await database.user_info( referrer_id)
+    except:
+        user_info_text = 'Пользователь не найден'
+    await bot.send_message(user_id, 'Реферер: ' + user_info_text, disable_web_page_preview=True, reply_markup=partners_markup)
+
       
 async def resources_tub(user_id):
     await bot.send_message(user_id, texts.resurses_text)
@@ -383,7 +376,7 @@ async def switch_tubs(code , user_id):
         await utils.partners_tub(user_id)
     elif code == "bonuses":
         await utils.bonuses_tub(user_id)
-    elif code == "learn":
+    elif code == "income":
         await utils.learn_tub(user_id)
 # Guide
 # Про Уровни. Даем первый бонус. Открывайте.

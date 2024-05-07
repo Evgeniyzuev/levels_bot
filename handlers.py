@@ -17,12 +17,12 @@ from aiogram.utils.deep_linking import create_start_link, decode_payload
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 # from sqlalchemy.sql import func
 # from aiogram.methods.get_chat import GetChat
-from aiogram.types import (
-    KeyboardButton,
-    Message,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-)
+# from aiogram.types import (
+#     KeyboardButton,
+#     Message,
+#     ReplyKeyboardMarkup,
+#     ReplyKeyboardRemove,
+# )
 
 #     Справочник https://t.me/aiogram/28
 #     await callback_query.answer("Как много?",reply_markup=ReplyKeyboardRemove(),)  Всплывающее сообщение и удаление клавиатуры
@@ -509,6 +509,32 @@ async def process_transfer_approve(callback_query: types.CallbackQuery, state: F
 #     await bot.send_message(user_id, f'Отменено')
 #     await state.set_state(None)
 
+@dp.callback_query(F.data == "referrals")
+async def process_referrals(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+    referrals_text = "Рефералы:"
+    user_count = 1
+    user_id = callback_query.from_user.id
+    for user in await database.get_all_referrals(user_id):
+        try:
+            referrals_text += (f"\n{user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+            user_count += 1
+        except:
+            pass
+    await bot.send_message(user_id, referrals_text, disable_web_page_preview=True)
+
+@dp.callback_query(F.data == "other_partners")
+async def process_other_partners(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+    user_count = 1
+    other_partners_text = "Партнеры:"
+    user_id = callback_query.from_user.id
+    for user in await database.get_all_referrers(user_id):        
+        try:
+            other_partners_text += (f"\n{user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+            user_count += 1
+        except:
+            pass
+    await bot.send_message(user_id, other_partners_text, disable_web_page_preview=True)
+
 @dp.callback_query(F.data == "restate_up")
 async def process_grow_to_restate(callback_query: types.CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
@@ -633,10 +659,10 @@ async def check_done(callback_query: types.CallbackQuery):
 
 # SWITCH TABS
 
-switch_tabs_data =      ["profile"   , "resources"   , "level", "settings" , "balance"  , "partners"  , "bonuses"   , "learn"     ] 
-switch_tabs_text=      ["Профиль"   , "Ресурсы"     , "Уровень"  , "Настрой"  , "Баланс"     , "Партнеры"    , "Бонусы"    , "Обучение"     ]
-switch_tabs_emoji_text=["😃\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "⚙️\nНастрой", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "📚\nОбучение"]
-switch_tabs_commands = ["/profile"  , "/resources"    , "/level"     , "/settings"   , "/balance"   , "/partners"   , "/bonuses"    , "/learn"    ]
+switch_tabs_data =      ["profile"   , "resources"   , "level", "settings" , "balance"  , "partners"  , "bonuses"   , "income"     ] 
+switch_tabs_text=      ["Профиль"   , "Ресурсы"     , "Уровень"  , "Настрой"  , "Баланс"     , "Партнеры"    , "Бонусы"    , "ПроДоход"     ]
+switch_tabs_emoji_text=["😃\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "⚙️\nНастрой", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "❓\nПроДоход"]
+switch_tabs_commands = ["/profile"  , "/resources"    , "/level"     , "/settings"   , "/balance"   , "/partners"   , "/bonuses"    , "/income"    ]
 
 @dp.callback_query(F.data)
 async def swith_menu_tubs(callback_query: types.CallbackQuery):
