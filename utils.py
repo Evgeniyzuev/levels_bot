@@ -323,7 +323,7 @@ async def balance_tub(user_id):
     text3 = f"\n\nДоход в день руб:\n💎(25%): {restate_income}\n💳(20%): {grow_wallet_income}"
     balance_text = text0 + text1 + text2 + text3
     try:
-        await bot.send_photo(user_id, photo=config.photo_ids_test['restate_grow_liquid'], caption=f'{balance_text}', reply_markup=kb.balance_control_markup)
+        await bot.send_photo(user_id, photo=config.photo_ids_test['account_photo'], caption=f'{balance_text}', reply_markup=kb.balance_control_markup)
     except:
         await bot.send_message(user_id, f'{balance_text}', reply_markup=kb.balance_control_markup)
 

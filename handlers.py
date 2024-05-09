@@ -26,6 +26,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardBu
 
 #     Справочник https://t.me/aiogram/28
 #     await callback_query.answer("Как много?",reply_markup=ReplyKeyboardRemove(),)  Всплывающее сообщение и удаление клавиатуры
+#      await message.answer("Операция отменена",)  answer высплывает сообщение
 
 
 # класс состояний
@@ -35,7 +36,8 @@ class Form(StatesGroup):
     wait_check = State()
     grow_wallet_up = State()
     restate_up = State()
-    restate_down = State()
+    # wallet_stack_confirm = State()
+    # restate_down = State()
     admin_send_ckeck_state = State()
     user_send_ckeck_state = State()
     requisites_entering_state = State()
@@ -264,7 +266,7 @@ async def process_confirm_payment_button(callback_query: types.CallbackQuery): #
 
     await utils.add_grow(user_id, amount)
     await bot.edit_message_reply_markup(config.levels_guide_id, message_id=callback_query.message.message_id, reply_markup=None )
-    await bot.send_message(user_id, f'Пополнение grow_wallet:\n + {amount} рублей' )
+    await bot.send_message(user_id, f'Пополнение Счета:\n + {amount} рублей' )
     await bot.send_message(config.levels_guide_id, f'User: {user_id} \nПополнение grow_wallet:\n + {amount} рублей' )
 
 # Подтвердить введенную сумму?
@@ -273,7 +275,7 @@ async def process_amount(message: Message, state: FSMContext) -> None:
     await state.set_state(Form.amount_state_ok)
     await state.update_data(amount=message.text)
     database.payment_to_check_amount = int(message.text)
-    await message.answer(f'Пополнить grow_wallet:\n + {message.text} рублей\n\nUser ID: {database.payment_to_check_user_id}',reply_markup=ReplyKeyboardMarkup(
+    await message.answer(f'Пополнить Счет:\n + {message.text} рублей\n\nUser ID: {database.payment_to_check_user_id}',reply_markup=ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text="Yes"),KeyboardButton(text="No"),]],resize_keyboard=True,),)
 
 
@@ -540,64 +542,89 @@ async def process_grow_to_restate(callback_query: types.CallbackQuery, state: FS
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.restate_up)
-    await bot.send_message(user_id, f'\n💳Счёт -> 💎Стек\n\nДоступно 💳Счёт: ' + '%.2f' %(user.grow_wallet) + ' рублей\nВведите сумму:') 
+    await bot.send_message(user_id, f'\n💳Счёт -> 💎Стек\n\nДоступно: ' + '%.2f' %(user.grow_wallet) + ' рублей\nВведите сумму:') 
 
 @dp.message(StateFilter(Form.restate_up))
 async def process_amount(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     user = await database.get_user(user_id)
     await state.update_data(amount=message.text)
+    database.payment_to_check_amount = int(message.text)
     try:
         amount = int(message.text)
         if amount < 0: amount = -1*amount
         if amount > user.grow_wallet:
             await message.answer(f'Недостаточно средств')
         else:
-            await utils.add_grow(user_id, int(-1*amount))
-            await utils.add_restate(user_id, int(amount))
-            await message.answer(f'Пополненить 💎Стек:\n + {amount} рублей')
+            await message.answer(f'Пополненить 💎Стек:\n + {message.text} рублей\n\n❗️Внимание!\nДля продажи 💎Стека в дальнейшем потребуется подтверждение личности', 
+                reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Да", callback_data="wallet_stack_confirm"),InlineKeyboardButton(text="Нет", callback_data="wallet_stack_cancel")]], resize_keyboard=True,))
     except:
         await message.answer('Введите целое число')
     await state.set_state(None)
     
+# Подтвердить введенную сумму - да
+@dp.callback_query(F.data == "wallet_stack_confirm")
+async def process_wallet_stack_confirm(message: Message, state: FSMContext) -> None:
+
+    user_id = message.from_user.id
+    user = await database.get_user(user_id)
+    amount = database.payment_to_check_amount
+    if amount <= user.grow_wallet and amount > 0:
+        await utils.add_grow(user_id, int(-1*amount))
+        await utils.add_restate(user_id, int(amount))
+        await bot.send_message(user_id, f'💳Счёт пополнен:\n + {amount} рублей' )
+    else:
+        await bot.send_message(user_id, f'Недостаточно средств')
+    database.payment_to_check_amount = 0
+    # await message.answer("Готово",reply_markup=ReplyKeyboardRemove())
+
+
+# Отменить введенную сумму (нет)
+@dp.callback_query(F.data == "wallet_stack_cancel")
+async def process_wallet_stack_cancel(message: Message, state: FSMContext) -> None:
+    database.payment_to_check_amount = 0
+    user_id = message.from_user.id
+    await bot.send_message(user_id, f'Операция отменена')
+
+
+
     
 @dp.callback_query(F.data == "restate_down")
 async def process_restate_to_grow(callback_query: types.CallbackQuery, state: FSMContext) -> None:
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     if user.level < 1:
-        await bot.send_message(user_id, 'Продажа 💎Стека доступна с уровня 1')
+        await bot.send_message(user_id, 'Продажа 💎Стека недоступна на уровне 0')
     else:
-        await state.set_state(Form.restate_down)
+        # await state.set_state(Form.restate_down)
         restate_require =(250 * database.basecoin) * (2 ** (user.level))
-        await bot.send_message(user_id, f'💎Стек -> 💳Счёт\nКоммиссия 10%\nДоступно:'+ '%.2f' % (user.restate-restate_require) + ' рублей\nВведите сумму:')
+        await bot.send_message(user_id, f'💎Стек -> 💳Счёт\nДоступно:'+ '%.2f' % (user.restate) + ' рублей\n\n❗️Внимание!\nДля продажи 💎Стека в требуется подтверждение личности')
 
-@dp.message(StateFilter(Form.restate_down))
-async def process_amount(message: Message, state: FSMContext) -> None:
-    user_id = message.from_user.id
-    user = await database.get_user(user_id)
-    await state.update_data(amount=message.text)
-    restate_require =(250 * database.basecoin) * (2 ** (user.level))
-    text = f'Требование уровня по недвижимости: {restate_require} рублей\nНедвижимость ниже требования \
-                            приведет к заморозке уровня и дохода\nЗаморозка доступна с уровня 5\nДоступно к продаже: {user.restate - restate_require} рублей\n'
-    try:
-        amount = int(message.text)
-        if amount < 0: amount = -1*amount
-        if (user.restate - restate_require) < int(message.text):
-            await message.answer(text)
-        else:
-            await utils.add_restate(user_id, (-1)*int(amount))
-            await utils.add_grow(user_id, (0.9)*int(amount))
-            await message.answer(f'Вывод из restate:\n + {amount} рублей')
-    except:
-        await message.answer('Введите целое число')
+# @dp.message(StateFilter(Form.restate_down))
+# async def process_amount(message: Message, state: FSMContext) -> None:
+#     user_id = message.from_user.id
+#     user = await database.get_user(user_id)
+#     await state.update_data(amount=message.text)
+#     restate_require =(250 * database.basecoin) * (2 ** (user.level))
+#     text = f'Требование уровня по недвижимости: {restate_require} рублей\nНедвижимость ниже требования \
+#                             приведет к заморозке уровня и дохода\nЗаморозка доступна с уровня 5\nДоступно к продаже: {user.restate - restate_require} рублей\n'
+#     try:
+#         amount = int(message.text)
+#         if amount < 0: amount = -1*amount
+#         if (user.restate - restate_require) < int(message.text):
+#             await message.answer(text)
+#         else:
+#             await utils.add_restate(user_id, (-1)*int(amount))
+#             await utils.add_grow(user_id, (0.9)*int(amount))
+#             await message.answer(f'Вывод из restate:\n + {amount} рублей')
+#     except:
+#         await message.answer('Введите целое число')
         
-    await state.set_state(None)
+#     await state.set_state(None)
 
     
 @dp.message(F.photo)
 async def photo_handler(message: Message):
-    await bot.send_message(message.from_user.id, f'вижу фото')
     photo_data = message.photo[-1]
     await bot.send_message(message.from_user.id, f'photo_data: {photo_data}')
 

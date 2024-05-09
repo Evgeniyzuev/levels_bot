@@ -41,7 +41,7 @@ class User(Base):
     level = Column(Integer, index=True)
     restate = Column(FLOAT)
     grow_wallet = Column(FLOAT)
-    liquid_wallet = Column(FLOAT)
+    liquid_wallet = Column(FLOAT)   # не используется
     turnover = Column(FLOAT)
     sales = Column(Integer)
     bonuses_available = Column(Integer)
