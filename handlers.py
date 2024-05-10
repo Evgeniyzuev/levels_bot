@@ -61,7 +61,7 @@ async def start_handler( callback_query: types.CallbackQuery, command: CommandOb
         # await bot.send_message(user_id, f'referrer_id: {referrer_id}')
     except:
         await bot.send_message(user_id, text='❗️ Не валидная реферальная ссылка ❗️')
-        referrer_id = 0
+        referrer_id = None
     user = await database.get_or_create_user(user_id, user_name, user_link, referrer_id)
     # await callback_query.answer(f'ваш реферер: {referrer_id}')
     await utils.start_guide_stages(user_id)
@@ -71,8 +71,12 @@ async def start_handler( callback_query: types.CallbackQuery, command: CommandOb
 async def start_handler( callback_query: types.CallbackQuery): #message: Message,
     user_id = callback_query.from_user.id
     user_name = callback_query.from_user.full_name
-    await bot.send_message(user_id, f"{user_name}, привет!\nВсегда рад видеть! 🤗")
-    await utils.start_guide_stages(user_id)
+    await bot.send_message(user_id, f"{user_name}, привет!")
+    user = await database.get_user(user_id)
+    if user:
+        await utils.start_guide_stages(user_id)
+    else:
+        await bot.send_message(user_id, "Используйте реферальную ссылку для регистрации")
 
 @dp.message(Command("equality"))
 async def start_handler( callback_query: types.CallbackQuery): #message: Message,
@@ -503,8 +507,15 @@ async def process_referrals(callback_query: types.CallbackQuery, state: FSMConte
     user_id = callback_query.from_user.id
     for user in await database.get_all_referrals(user_id):
         try:
-            text_link = f'<a href="tg://user?id={user.user_id}">{user.user_name}</a>'
-            referrals_text += (f"\n{user_count}:"+ ' ' + text_link + f' lvl: {user.level}' + f' {user.referral_link}')
+            # chat_link = f'<a href="tg://user?id={user.user_id}">{user.user_name}</a>'
+            ref_link = f'<a href="{user.referral_link}"> Reflink</a>'
+            chat_link = f'{user.user_name}.'
+            if user.user_link: chat_link = f'<a href="t.me/{user.user_link}">{user.user_name}</a>.'
+            chat_link += '<a href="tg://openmessage?user_id='+ f'{user.user_id}' +'">'+ ' 🤖' +'</a>.'
+            chat_link += '<a href="https://t.me/@id'+ f'{user.user_id}' +'">'+ ' 🍏' +'</a>.'
+                # chat_link += f' <a href="t.me/{user.user_link}"> @</a>.'
+            # username_link = f't.me/{user.user_link}'
+            referrals_text += (f"\n{user_count}:"+ ' '  + f' Lvl {user.level}.' + chat_link + ref_link)
             user_count += 1
         except:
             pass
@@ -517,7 +528,11 @@ async def process_other_partners(callback_query: types.CallbackQuery, state: FSM
     user_id = callback_query.from_user.id
     for user in await database.get_all_referrers(user_id):        
         try:
-            other_partners_text += (f"\n{user_count}:"+ ' ' + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+            ref_link = f'<a href="{user.referral_link}"> Reflink</a>'
+            chat_link = f'{user.user_name}.'
+            if user.user_link: chat_link = f'<a href="t.me/{user.user_link}">{user.user_name}</a>.'
+            chat_link += '<a href="tg://openmessage?user_id='+ f'{user.user_id}' +'">'+ ' @' +'</a>.'
+            other_partners_text += (f"\n{user_count}:"+ ' '    + f' Lvl {user.level}.' + chat_link + ref_link)
             user_count += 1
         except:
             pass
@@ -528,21 +543,21 @@ async def process_grow_to_restate(callback_query: types.CallbackQuery, state: FS
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     await state.set_state(Form.restate_up)
-    await bot.send_message(user_id, f'\n💳Счёт -> 💎Стек\n\nДоступно: ' + '%.2f' %(user.grow_wallet) + ' рублей\nВведите сумму:') 
+    await bot.send_message(user_id, f'\n💳Счёт -> ✨Стек\n\nДоступно: ' + '%.2f' %(user.grow_wallet) + ' рублей\nВведите сумму:') 
 
 @dp.message(StateFilter(Form.restate_up))
 async def process_amount(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     user = await database.get_user(user_id)
-    await state.update_data(amount=message.text)
-    database.payment_to_check_amount = int(message.text)
     try:
+        await state.update_data(amount=message.text)
+        database.payment_to_check_amount = int(message.text)
         amount = int(message.text)
         if amount < 0: amount = -1*amount
         if amount > user.grow_wallet:
             await message.answer(f'Недостаточно средств')
         else:
-            await message.answer(f'Пополненить 💎Стек:\n + {message.text} рублей\n\n❗️Внимание!\nДля продажи 💎Стека в дальнейшем потребуется подтверждение личности', 
+            await message.answer(f'Пополненить ✨Стек:\n + {message.text} рублей\n\n❗️Внимание!\nДля продажи ✨Стека в дальнейшем потребуется подтверждение личности', 
                 reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Да", callback_data="wallet_stack_confirm"),InlineKeyboardButton(text="Нет", callback_data="wallet_stack_cancel")]], resize_keyboard=True,))
     except:
         await message.answer('Введите целое число')
@@ -580,11 +595,11 @@ async def process_restate_to_grow(callback_query: types.CallbackQuery, state: FS
     user_id = callback_query.from_user.id
     user = await database.get_user(user_id)
     if user.level < 1:
-        await bot.send_message(user_id, 'Продажа 💎Стека недоступна на уровне 0')
+        await bot.send_message(user_id, 'Продажа ✨Стека недоступна на уровне 0')
     else:
         # await state.set_state(Form.restate_down)
         restate_require =(250 * database.basecoin) * (2 ** (user.level))
-        await bot.send_message(user_id, f'💎Стек -> 💳Счёт\nДоступно:'+ '%.2f' % (user.restate) + ' рублей\n\n❗️Внимание!\nДля продажи 💎Стека в требуется подтверждение личности')
+        await bot.send_message(user_id, f'✨Стек -> 💳Счёт\nДоступно:'+ '%.2f' % (user.restate) + ' рублей\n\n❗️Внимание!\nДля продажи ✨Стека в требуется подтверждение личности')
 
 # @dp.message(StateFilter(Form.restate_down))
 # async def process_amount(message: Message, state: FSMContext) -> None:
@@ -673,8 +688,8 @@ async def check_done(callback_query: types.CallbackQuery):
 # SWITCH TABS
 
 switch_tabs_data =      ["profile"   , "resources"   , "level", "settings" , "balance"  , "partners"  , "bonuses"   , "income"     ] 
-switch_tabs_text=      ["Профиль"   , "Ресурсы"     , "Уровень"  , "Настрой"  , "Баланс"     , "Партнеры"    , "Бонусы"    , "ПроДоход"     ]
-switch_tabs_emoji_text=["😃\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "⚙️\nНастрой", "💳\nБаланс", "💎\nПартнеры", "🎁\nБонусы", "❓\nПроДоход"]
+switch_tabs_text=      ["Профиль"   , "Ресурсы"     , "Уровень"  , "Настрой"  , "Баланс"     , "Партнеры"    , "Бонусы"    , "Доходы"     ]
+switch_tabs_emoji_text=["😃\nПрофиль", "🔗\nРесурсы", "🔼\nУровень", "⚙️\nНастрой", "💳\nБаланс", "🤝\nПартнеры", "🎁\nБонусы", "❓\nДоходы"]
 switch_tabs_commands = ["/profile"  , "/resources"    , "/level"     , "/settings"   , "/balance"   , "/partners"   , "/bonuses"    , "/income"    ]
 
 @dp.callback_query(F.data)

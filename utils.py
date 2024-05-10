@@ -32,11 +32,16 @@ async def up_level(user_id):
     next_level = (user.level)+1
     restate_require =  math.ceil(250 * database.basecoin) * (2 ** (next_level))
     lead_grace =  math.ceil(250 * database.basecoin) * (2 ** (next_level))
-    balance = user.restate + user.grow_wallet
+    balance = user.grow_wallet
     if (restate_require-user.restate) > 0:
         database.gamma[user_id] = lead_grace-(user.grow_wallet -(restate_require-user.restate)) 
     else:  
          database.gamma[user_id] = lead_grace-(user.grow_wallet)
+
+    if restate_require-user.restate > 0:
+        text = f'Следующий уровень: {next_level}\n\n✨Стек+: ' + '%.2f' %(restate_require-user.restate) + ' руб'
+    else:
+        text = f'Следующий уровень: {next_level}'
 
     if database.gamma[user_id] > 0:
         database.gamma[user_id] = database.gamma[user_id]/100
@@ -44,11 +49,11 @@ async def up_level(user_id):
         database.gamma[user_id] = math.ceil(xxx)
         database.gamma[user_id] = database.gamma[user_id]*100
 
-        await bot.send_message(user_id, f'Следующий уровень: {next_level}\n\nСтек требуется: {restate_require} руб\nЦена: {lead_grace} руб\
-                               \n\nБаланс: '+ '%.2f' %(balance) + " руб"+ f'\n\nПополните баланс на {database.gamma[user_id]} руб', reply_markup=kb.show_requisites_markup)
+
+        await bot.send_message(user_id, text + f'\n\nЦена:    {lead_grace} руб\
+                               \nСчёт:    '+ '%.2f' %(balance) + " руб"+ f'\n\nПополните счёт на {database.gamma[user_id]} руб', reply_markup=kb.show_requisites_markup)
     else:
-        await bot.send_message(user_id, f'Следующий уровень: {next_level}\n\nСтек требуется: {restate_require} руб\nЦена: {lead_grace} руб\
-                               \n\nБаланс: '+ '%.2f' %(balance) + " руб", reply_markup=kb.up_me)
+        await bot.send_message(user_id, text + f'\n\nЦена:   {lead_grace} руб\nСчёт:    '+ '%.2f' %(balance) + " руб", reply_markup=kb.up_me)
 
 
 
@@ -86,10 +91,11 @@ async def admin_show_all_users():
     users_text = ''
     for user in await database.get_all_users():
         user_count += 1
-        user_id_text = str(user.user_id)
-        user_name_text = user.user_name
-
-        users_text += '\n<a href="tg://openmessage?user_id='+user_id_text+'">'+user_name_text+'</a>'#<a href="tg://user?id=123456789">inline mention of a user</a>'   tg://openmessage?user_id=
+        # ref_link = f'<a href="{user.referral_link}"> Reflink</a>'
+        chat_link = f'{user.user_name}.'
+        if user.user_link: chat_link = f'<a href="t.me/{user.user_link}">{user.user_name}</a>.'
+        users_text += '\n'+f'{user_count}'+' '+chat_link
+        users_text += '<a href="tg://openmessage?user_id='+ f'{user.user_id}' +'">'+ ' @' +'</a>'#<a href="tg://user?id=123456789">inline mention of a user</a>'   tg://openmessage?user_id
         # user_info_text = f"User {user_count}: " + await database.user_info( user.user_id)
     await bot.send_message(config.levels_guide_id, f'users: {user_count}' + users_text, disable_web_page_preview=True)
 
@@ -188,13 +194,13 @@ async def open_bonus(user_id):
             bonuses_gotten = user.bonuses_gotten
             balance_sum = user.restate+user.grow_wallet
 
-            text1 = '\n🔼 Получено бонусов:     ' + f"{bonuses_gotten}"
+            # text1 = '\n🔼 Получено бонусов:     ' + f"{bonuses_gotten}"
             text2 = f"\n🎁 Бонус:         " + '%.2f' %(bonus_size) + " руб" 
             text3 = "\n💳 Баланс:      " + ( '%.2f' %(balance_sum)) + " руб"
             try:
-                await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'], caption=text1 + text2 + text3)
+                await bot.send_photo(user_id, photo=config.photo_ids_test['bonus_open'], caption= text2 + text3)
             except:
-                await bot.send_message(user_id,'Здесь могло быть наше фото 😄\n' + text1 + text2 + text3)
+                await bot.send_message(user_id,'Здесь могло быть наше фото 😄\n' + text2 + text3)
         else:
             try:
                 await bot.send_photo(user_id, photo=config.photo_ids_test['travolta'], caption=texts.bonuses_none)
@@ -317,13 +323,13 @@ async def settings_tub(user_id):
 
 async def balance_tub(user_id):
     user = await database.get_user(user_id)
-    text1 =   "\n💎Стек:    " + '%.2f' %(user.restate)
+    text1 =   "\n✨Стек:    " + '%.2f' %(user.restate)
     text2 =   "\n💳Счёт:    " + '%.2f' %(user.grow_wallet)
     sum = user.restate + user.grow_wallet
     restate_income = user.restate * 0.00062
     grow_wallet_income = user.grow_wallet * 0.0005
     text0 =   "Баланс:    " + ( '%.2f' %(sum)) + " руб"
-    text3 = f'\n\nДоход в день руб:\n<a href="https://telegra.ph/Passivnyj-dohod-05-10">💎(25%):</a> {restate_income}\n<a href="https://telegra.ph/Passivnyj-dohod-05-10">💳(20%):</a> {grow_wallet_income}'
+    text3 = f'\n\nДоход в день руб:\n<a href="https://telegra.ph/Passivnyj-dohod-05-10">✨(25%):</a> {restate_income}\n<a href="https://telegra.ph/Passivnyj-dohod-05-10">💳(20%):</a> {grow_wallet_income}'
     balance_text = text0 + text1 + text2 + text3
     try:
         await bot.send_photo(user_id, photo=config.photo_ids_test['account_photo'], caption=f'{balance_text}', reply_markup=kb.balance_control_markup)
@@ -348,20 +354,22 @@ async def resources_tub(user_id):
 async def bonuses_tub(user_id):
     try:
         user = await database.get_user(user_id) 
-        bonuses_available = user.bonuses_available
-        bonuses_gotten = user.bonuses_gotten
         referral_link = user.referral_link 
-        text2 = f"\n\nВаша личная реф ссылка:\n{referral_link}"
-        await bot.send_message(user_id, texts.bonuses_tub_text1 + text2 + texts.bonuses_tub_text2 + f"{bonuses_gotten}"\
-                                + "\nДоступно бонусов: " + f"{bonuses_available}", reply_markup=kb.bonuses_markup)
+        text2 = f"\n\nВаша реферальная ссылка:\n{referral_link}"
+        caption = texts.bonuses_tub_text1 + text2 + texts.bonuses_tub_text2
+        if user.bonuses_available > 0:
+            await bot.send_photo(user_id, photo=config.photo_ids_test['bonuses_pile'], caption=caption, reply_markup=kb.bonuses_markup)
+        else:
+            await bot.send_photo(user_id, photo=config.photo_ids_test['bonuses_pile'], caption=caption)
+        # await bot.send_message(user_id, caption , reply_markup=kb.bonuses_markup)
     except:
         await bot.send_message(user_id, "Пользователь не найден. Перезагрузите бота")
 
-async def learn_tub(user_id):
+async def income_tub(user_id):
     learn_text = texts.learn_text_0
     user = await database.get_user(user_id)
     if user.level > 0:
-        learn_text += '\n' + texts.learn_text_1
+        learn_text += texts.learn_text_1
     await bot.send_message(user_id, learn_text, parse_mode="MarkdownV2", reply_markup=kb.learn_markup)
 
 async def switch_tubs(code , user_id):
@@ -380,7 +388,7 @@ async def switch_tubs(code , user_id):
     elif code == "bonuses":
         await utils.bonuses_tub(user_id)
     elif code == "income":
-        await utils.learn_tub(user_id)
+        await utils.income_tub(user_id)
 # Guide
 # Про Уровни. Даем первый бонус. Открывайте.
 async def start_guide1(user_id):
