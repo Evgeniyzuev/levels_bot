@@ -110,6 +110,7 @@ async def delete_inactive_users():
             await database.delete_user(user.user_id)
             await database.delete_all_refs(user.user_id)
         else: pass
+    await bot.send_message(config.levels_guide_id, 'Done')
         
                 
 
@@ -312,6 +313,8 @@ async def settings_tub(user_id):
     settings_markup= InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Уведомления", callback_data="notifications")],[InlineKeyboardButton(text="Профиль", callback_data="profile_settings")]],resize_keyboard=True,)
     await bot.send_message(user_id, f"\nНастройки", reply_markup=settings_markup)
 
+# HTML: <a href="tg://user?id=111111">User link</a>
+
 async def balance_tub(user_id):
     user = await database.get_user(user_id)
     text1 =   "\n💎Стек:    " + '%.2f' %(user.restate)
@@ -320,7 +323,7 @@ async def balance_tub(user_id):
     restate_income = user.restate * 0.00062
     grow_wallet_income = user.grow_wallet * 0.0005
     text0 =   "Баланс:    " + ( '%.2f' %(sum)) + " руб"
-    text3 = f"\n\nДоход в день руб:\n💎(25%): {restate_income}\n💳(20%): {grow_wallet_income}"
+    text3 = f'\n\nДоход в день руб:\n<a href="https://telegra.ph/Passivnyj-dohod-05-10">💎(25%):</a> {restate_income}\n<a href="https://telegra.ph/Passivnyj-dohod-05-10">💳(20%):</a> {grow_wallet_income}'
     balance_text = text0 + text1 + text2 + text3
     try:
         await bot.send_photo(user_id, photo=config.photo_ids_test['account_photo'], caption=f'{balance_text}', reply_markup=kb.balance_control_markup)

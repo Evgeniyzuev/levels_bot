@@ -490,26 +490,11 @@ async def process_transfer_approve(callback_query: types.CallbackQuery, state: F
         await state.set_state(None)
 
 
+# Markdown:
+# [User link](tg://user?id=111111)
 
-# @dp.callback_query(F.data == "transfer_approve")
-# async def process_transfer_approve(callback_query: types.CallbackQuery, state: FSMContext) -> None:
-#     user_id = callback_query.from_user.id
-#     user = await database.get_user(user_id)
-#     transfer = database.transfers[user_id]
-#     if transfer.amount <= user.grow_wallet:
-#         await utils.add_grow(user_id, -transfer.amount)
-#         await utils.add_grow(transfer.user_to_id, transfer.amount)
-#         await bot.send_message(user_id, f'Переведено пользователю: {transfer.user_to_id}\nСумма: {transfer.amount} рублей')
-#     else:
-#         await bot.send_message(user_id, f'Недостаточно средств')
-#     await state.set_state(None)
-
-# @dp.callback_query(F.data == "transfer_cancel")
-# async def process_transfer_cancel(callback_query: types.CallbackQuery, state: FSMContext) -> None:
-#     user_id = callback_query.from_user.id
-#     database.transfers[user_id] = None
-#     await bot.send_message(user_id, f'Отменено')
-#     await state.set_state(None)
+# HTML:
+# <a href="tg://user?id=111111">User link</a>
 
 @dp.callback_query(F.data == "referrals")
 async def process_referrals(callback_query: types.CallbackQuery, state: FSMContext) -> None:
@@ -518,7 +503,8 @@ async def process_referrals(callback_query: types.CallbackQuery, state: FSMConte
     user_id = callback_query.from_user.id
     for user in await database.get_all_referrals(user_id):
         try:
-            referrals_text += (f"\n{user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+            text_link = f'<a href="tg://user?id={user.user_id}">{user.user_name}</a>'
+            referrals_text += (f"\n{user_count}:"+ ' ' + text_link + f' lvl: {user.level}' + f' {user.referral_link}')
             user_count += 1
         except:
             pass
@@ -531,7 +517,7 @@ async def process_other_partners(callback_query: types.CallbackQuery, state: FSM
     user_id = callback_query.from_user.id
     for user in await database.get_all_referrers(user_id):        
         try:
-            other_partners_text += (f"\n{user_count}: " + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
+            other_partners_text += (f"\n{user_count}:"+ ' ' + f'{user.user_name},'+ f' lvl: {user.level}' + f' {user.referral_link}')
             user_count += 1
         except:
             pass
