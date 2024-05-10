@@ -309,7 +309,7 @@ async def level_tub(user_id):
         await bot.send_message(user_id, f"\nВаш уровень: {level}", reply_markup=kb.level_markup)
 
 async def settings_tub(user_id):
-    settings_markup= InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Уведомления", callback_data="notifications")],[InlineKeyboardButton(text="Профиль", callback_data="other_partners")]],resize_keyboard=True,)
+    settings_markup= InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="Уведомления", callback_data="notifications")],[InlineKeyboardButton(text="Профиль", callback_data="profile_settings")]],resize_keyboard=True,)
     await bot.send_message(user_id, f"\nНастройки", reply_markup=settings_markup)
 
 async def balance_tub(user_id):
