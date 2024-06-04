@@ -59,15 +59,11 @@ async def up_level(user_id):
 
 async def good_morning_all():
     database.basecoin = database.basecoin * (1 + 0.0005)
-    user_count = 1
+
     for user in await database.get_all_users():
         user_id = user.user_id
-        try:
-            await good_morning(user_id)
-            await bot.send_message(config.levels_guide_id, f'GM user {user_count} ')
-        except:
-            await bot.send_message(config.levels_guide_id, f'GM user {user_count} error')
-        user_count += 1
+        await good_morning(user_id)
+
     
 
 
